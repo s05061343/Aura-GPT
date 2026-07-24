@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura GPT - 系統設計與架構規劃書</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --link-color: #0366d6;
+            --code-bg: #f6f8fa;
+            --border-color: #dfe2e5;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        h1, h2, h3 {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+            margin-top: 1.5em;
+        }
+        h1 { font-size: 2em; }
+        h2 { font-size: 1.5em; }
+        h3 { 
+            font-size: 1.25em; 
+            border-bottom: none;
+        }
+        p, ul, li { margin-bottom: 1em; }
+        pre {
+            background-color: var(--code-bg);
+            padding: 16px;
+            overflow: auto;
+            border-radius: 6px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 85%;
+            line-height: 1.45;
+        }
+        code {
+            background-color: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 85%;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        blockquote {
+            padding: 0 1em;
+            color: #6a737d;
+            border-left: 0.25em solid #dfe2e5;
+            margin: 0 0 1em 0;
+            background-color: #f9f9f9;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th { background-color: var(--code-bg); }
+    </style>
+</head>
+<body>
+
+    <h1>Aura GPT - 系統設計與架構規劃書</h1>
+
+    <h2>1. 專案概述 (Project Overview)</h2>
+    <p><strong>Aura GPT</strong> 是一款基於本地端大型語言模型 (Local LLM) 驅動的現代化 AI 代理系統。</p>
+    <p>本系統結合了靈活的 Web 介面與強大的本地端推論引擎，旨在提供高隱私性、低延遲的對話體驗。透過整合 Tool Calling (工具呼叫) 與 Generative UI (生成式介面)，Aura GPT 能夠突破本地模型的知識截斷限制，實現動態資料查詢與視覺化互動。</p>
+    <p><strong>核心特色：</strong>具備「模型不可知 (Model-Agnostic)」特性，底層推論引擎可隨時無縫抽換為任意支援 Tool Calling 的 GGUF 模型，無需修改前端與代理層程式碼。</p>
+
+    <h2>2. 系統架構 (System Architecture)</h2>
+    <p>採用「前端介面、代理編排、本地推論」三層完全解耦的設計：</p>
+    <pre><code>[ 用戶端 (Browser) ]
+       │  ▲
+       │  │ (HTTP Streaming / SSE 串流)
+       ▼  │
+[ 展示層: Next.js UI (useChat / Generative UI) ]
+       │  ▲
+       │  │ (傳送 Prompt + 工具結果 / 接收 Markdown 串流)
+       ▼  │
+[ 代理層: API Route + LangChain Agent ] ──▶ [ 外部 API (如天氣查詢) ]
+       │  ▲
+       │  │ (OpenAI REST API 格式: 帶入 tools schema)
+       ▼  │
+[ 推論層: llama-server (動態載入任意 GGUF 模型) ]</code></pre>
+
+    <h2>3. 技術選型 (Tech Stack)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>層級</th>
+                <th>技術 / 框架</th>
+                <th>說明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>前端與 API 層</strong></td>
+                <td>Next.js 14+ (React)</td>
+                <td>負責 UI 渲染、路由管理與 API Route 處理</td>
+            </tr>
+            <tr>
+                <td><strong>UI 與串流 SDK</strong></td>
+                <td>Vercel AI SDK (<code>ai</code>, <code>@ai-sdk/react</code>)</td>
+                <td>負責打字機效果 (Streaming)、Generative UI 渲染</td>
+            </tr>
+            <tr>
+                <td><strong>Agent 編排層</strong></td>
+                <td>LangChain.js, Zod</td>
+                <td>負責 Prompt 管理、Tool Calling 觸發與多輪對話控制</td>
+            </tr>
+            <tr>
+                <td><strong>本地推論引擎</strong></td>
+                <td><code>llama.cpp</code></td>
+                <td>以 <code>llama-server</code> 提供 OpenAI 相容 API</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. 專案資料夾結構 (Folder Structure)</h2>
+    <p>包含 <code>scripts/</code> 目錄與 <code>models/</code> 目錄，將 LLM 供應層與 Web 專案一併管理：</p>
+    <pre><code>aura-gpt/
+├── app/                       # Next.js App Router
+│   ├── api/chat/route.ts      # API 進入點
+│   └── page.tsx               # 主聊天室介面
+├── components/                # React 元件與 Generative UI
+├── lib/
+│   ├── agent/                 # LangChain Agent 設定與 Prompt
+│   └── tools/                 # 外部工具定義 (如 weatherTool.ts)
+├── models/                    # [新增] 存放下載的 GGUF 模型檔 (加入 .gitignore)
+│   ├── qwen-3.7-instruct.gguf
+│   └── llama-3.1-8b-instruct.gguf 
+├── scripts/                   # [新增] 系統運維與啟動腳本
+│   └── start-llm.sh           # llama.cpp 自動啟動腳本
+├── .env                       # 全局環境變數 (配置模型路徑、Port)
+└── package.json</code></pre>
+
+    <h2>5. 模型動態抽換管理 (Model Swapping Management)</h2>
+    <p>為了讓模型可以「任意抽換」，系統使用統一的環境變數進行控制，由啟動腳本讀取參數。</p>
+    
+    <h3>5.1 環境變數設定 (<code>.env</code>)</h3>
+    <pre><code># --- LLM Server Configuration ---
+# 只要更改這裡的檔名，就能一鍵抽換模型
+LLM_MODEL_PATH=./models/qwen-3.7-instruct.gguf
+LLM_SERVER_PORT=8080
+LLM_CONTEXT_SIZE=8192
+LLM_GPU_LAYERS=99
+
+# --- Next.js Configuration ---
+LLAMA_SERVER_URL=http://localhost:8080/v1</code></pre>
+
+    <h3>5.2 自動啟動腳本 (<code>scripts/start-llm.sh</code>)</h3>
+    <pre><code>#!/bin/bash
+# 讀取 .env 檔案中的變數
+export $(grep -v '^#' .env | xargs)
+
+echo "🚀 啟動 Aura GPT 本地推論引擎..."
+echo "📦 載入模型: $LLM_MODEL_PATH"
+echo "🔌 服務埠口: $LLM_SERVER_PORT"
+echo "🧠 上下文長度: $LLM_CONTEXT_SIZE"
+
+# 啟動 llama-server
+./llama-server \
+  -m $LLM_MODEL_PATH \
+  --port $LLM_SERVER_PORT \
+  -c $LLM_CONTEXT_SIZE \
+  --n-gpu-layers $LLM_GPU_LAYERS \
+  --alias "aura-gpt-backend"</code></pre>
+
+    <h2>6. 核心功能實作規範 (Core Feature Specs)</h2>
+    <ul>
+        <li><strong>工具呼叫 (Tool Calling)：</strong> 所有註冊在 LangChain 的 Tools 必須以 Zod 定義 Schema。建議選用檔名帶有 <code>Instruct</code> 或 <code>Tool</code> 標籤的模型（如 Qwen-Instruct 或 Hermes）以確保 JSON 輸出穩定。</li>
+        <li><strong>無匹配處理 (Fallback)：</strong> 於 <code>lib/agent/prompt.ts</code> 設置防呆指令，若模型找不到合適工具，需自動降級為一般對話。
+            <blockquote>「若使用者的請求無法透過現有工具解決，請勿虛構動作，直接使用你的預設知識回答，或誠實告知無法處理。」</blockquote>
+        </li>
+        <li><strong>串流處理 (Streaming)：</strong> API Route 負責將 LangChain 的輸出轉為 Byte Stream，交由 Vercel AI SDK 解析並渲染打字機效果。</li>
+    </ul>
+
+</body>
+</html>

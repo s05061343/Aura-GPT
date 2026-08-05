@@ -14,9 +14,10 @@
 ### Integration
 
 - 以 fake LLM 驗證 text → tool call → tool result → final text 完整迴圈。
+- 驗證 LangChain event → Aura stream event 的 protocol adapter 契約，避免 LangChain 升級影響 UI。
 - 串流開始前與開始後的錯誤行為。
 - 工具 timeout、無效 JSON、未知工具、過大輸出及取消。
-- llama-server adapter 對已驗證 API 子集的契約測試。
+- LangChain model adapter 對 llama-server 已驗證 API 子集的契約測試。
 
 ### End-to-end
 
@@ -47,7 +48,7 @@
 - 未授權外部工具不產生外部網路流量。
 - 未知 UI block 或工具結果異常時仍能顯示安全 fallback。
 - 支援模型清單中的每個 profile 有可追溯 smoke test 結果。
-- lint、type check、unit、integration 與關鍵 E2E 測試通過。
+- lint、type check、unit、integration 與關鍵 E2E 測試通過，並證明工具迴圈只由 LangChain runtime 管理。
 - 對應規格與 ADR 已更新，沒有阻擋發布的未決事項。
 
 ## 效能基準

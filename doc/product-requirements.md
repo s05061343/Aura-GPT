@@ -6,6 +6,8 @@
 
 Aura-GPT 是以本機大型語言模型為預設推論來源的桌面級 Web AI 助理。第一版要提供可串流的多輪對話、受控工具呼叫與預先定義的生成式 UI，同時讓使用者理解哪些資料留在本機、哪些資料可能被工具送往外部服務。
 
+LangChain.js 是產品的核心 Agent 開發框架。模型存取、Prompt、工具註冊、多步執行與事件追蹤均透過 LangChain 邊界設計；UI 不直接編排工具。
+
 ## 目標使用者
 
 - 希望在個人電腦執行模型，重視資料控制權的技術使用者。
@@ -27,6 +29,7 @@ Aura-GPT 是以本機大型語言模型為預設推論來源的桌面級 Web AI 
 
 - 單機、單使用者、單一同時載入模型。
 - Next.js Web UI 與本機 API。
+- LangChain.js Agent runtime 與 llama-server model adapter。
 - llama.cpp 提供的 OpenAI-compatible endpoint。
 - 多輪對話、取消生成、Markdown 顯示及錯誤回饋。
 - 至少一個唯讀示範工具，以及對應的生成式 UI 元件。

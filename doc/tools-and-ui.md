@@ -4,11 +4,11 @@
 
 ## 工具定義
 
-每個工具必須包含：
+每個工具以 LangChain Structured Tool 註冊，並必須包含：
 
 - 穩定且具 namespace 的名稱，例如 `weather.current.v1`。
 - 清楚、避免誘導誤用的模型可見說明。
-- Zod input schema，以及獨立的 output schema 或正規化器。
+- 可供 LangChain 綁定模型的 Zod input schema，以及獨立的 output schema 或正規化器。
 - 風險等級、是否唯讀、是否冪等、timeout 與最大輸出大小。
 - 執行器與公開錯誤 mapping。
 - 可選的 UI block mapping。
@@ -33,6 +33,8 @@
 5. 以 AbortSignal、timeout 與輸出上限執行。
 6. 將內部錯誤正規化；外部文字不得提升為 system instruction。
 7. 將工具結果和 UI descriptor 分開產生。
+
+LangChain 負責選擇與呼叫工具；應用層 policy wrapper 負責授權和安全限制。不得因模型或 LangChain Agent 決定呼叫，就跳過使用者授權。
 
 ## Generative UI 契約
 

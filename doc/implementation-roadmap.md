@@ -9,9 +9,9 @@
 交付成果：
 
 - 確認首個工具、對話保存政策與外部工具授權模式。
-- 選定並鎖定 Node、Next.js、AI SDK、Zod 與 llama.cpp 版本。
+- 選定並鎖定 Node、Next.js、LangChain.js、AI SDK、Zod 與 llama.cpp 版本。
 - 選定第一個實際 GGUF 模型，建立包含來源、授權、checksum 與硬體需求的 profile。
-- 驗證 llama-server 的文字串流及 native tool calling 行為。
+- 以 LangChain model adapter 驗證 llama-server 的文字串流及 native tool calling 行為。
 
 退出條件：阻擋 MVP 的產品未決事項清除；基本模型 probe 有可重現結果。
 
@@ -20,16 +20,16 @@
 交付成果：
 
 - 建立 Next.js/TypeScript 專案、設定驗證與本機啟動腳本。
-- LLM adapter、Chat API、串流 UI、停止與錯誤狀態。
+- LangChain model adapter、最小 Agent runtime、Chat API、protocol adapter、串流 UI、停止與錯誤狀態。
 - fake LLM 測試及真實 llama-server smoke test。
 
-退出條件：可從瀏覽器完成串流對話、取消、模型離線處理與 correlation ID 追蹤。
+退出條件：可從瀏覽器經 LangChain 完成串流對話、取消、模型離線處理與 correlation ID 追蹤。
 
 ## Phase 2：受控 Agent loop
 
 交付成果：
 
-- Tool registry、共用 schema、步數限制、timeout、取消與錯誤模型。
+- LangChain Structured Tool registry、應用層 policy wrapper、共用 schema、步數限制、timeout、取消與錯誤模型。
 - 一個 mock 工具及一個正式唯讀工具。
 - 外部資料傳送揭露與授權 UI。
 

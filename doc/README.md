@@ -16,7 +16,7 @@
 | 8 | [實作路線圖](implementation-roadmap.md) | 分期、依賴、交付成果與退出條件 | Draft |
 | 9 | [架構決策紀錄](decisions.md) | 已接受、暫定與待決策事項 | Living |
 
-原始可視化摘要位於 [AuraGPT_Design_Document.html](AuraGPT_Design_Document.html)。Markdown 規格是實作時的主要依據；HTML 提供高階導覽，不重複所有細節。
+Markdown 規格是唯一實作依據。舊版 `AuraGPT_Design_Document.html` 已移除，其有效內容已整合至本索引所列文件，以免維護兩套重複且可能漂移的規格。
 
 ## 狀態定義
 

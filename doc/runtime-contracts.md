@@ -26,7 +26,7 @@ type ChatRequest = {
 
 ## 串流事件
 
-實作可使用 AI SDK 已定義的 wire protocol，但應在應用層保留下列語意，不讓 UI 依賴供應商私有物件：
+LangChain callback/event stream 必須先轉為下列應用事件。HTTP adapter 可再編碼成前端 AI SDK 可消費的 wire protocol，但 UI 不直接依賴 LangChain 內部事件形狀：
 
 ```ts
 type AuraStreamEvent =
@@ -42,7 +42,7 @@ type AuraStreamEvent =
 
 ## Agent loop
 
-MVP 預設政策：
+Agent loop 由 LangChain runtime 唯一負責。Next.js route 只做傳輸、驗證與事件轉換，不自行判斷下一個工具步驟。MVP 預設政策：
 
 - 每次使用者請求最多 5 個模型步驟；正式數值可由環境設定覆寫並設硬上限。
 - 每個工具都有獨立 timeout，預設建議 15 秒。
@@ -50,6 +50,14 @@ MVP 預設政策：
 - 同一輪平行工具呼叫只允許明確標示為唯讀、彼此獨立的工具。
 - 工具結果必須限制序列化大小；超限時截斷或摘要，並標記不完整。
 - 收到 AbortSignal 後，不得啟動新工具，現有模型與工具請求應盡力取消。
+
+## LangChain 邊界
+
+- 對內定義 `AuraAgentRuntime` 介面，避免 route 直接耦合特定 Agent factory 或 executor 類別。
+- LangChain message、tool call 與 callback event 僅存在於 agent/model adapter 層。
+- model adapter 必須支援逐步串流、工具 schema 綁定、AbortSignal 與結構化完成原因。
+- LangChain 版本升級若改變 event schema，應只修改 protocol adapter 與契約測試。
+- 所有工具仍需經應用層 policy wrapper；註冊為 LangChain Tool 不等於取得執行權限。
 
 ## 錯誤模型
 

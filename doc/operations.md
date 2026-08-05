@@ -7,7 +7,7 @@
 MVP 由兩個本機程序組成：
 
 1. `llama-server`：載入一個 GGUF 模型並監聽 loopback。
-2. Next.js：提供 UI、Chat API、Agent loop 與工具執行。
+2. Next.js：提供 UI、Chat API、LangChain Agent runtime 與工具執行。
 
 正式建立專案時應提供 PowerShell 啟動腳本；可另外提供 Bash，兩者共用相同設定語意。Docker Compose 是否加入留待實作階段確認。
 

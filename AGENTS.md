@@ -35,5 +35,7 @@
 
 - 第一版是單機、單使用者、單一載入模型。
 - 「模型切換」初期代表重新啟動推論服務，不宣稱支援 hot swap。
-- MVP Agent loop 暫定由 Vercel AI SDK 負責；只有出現持久化工作流、分支圖或多 Agent 需求時，才重新評估 LangChain/LangGraph。
+- LangChain.js 是核心且唯一的 Agent 編排層，負責模型抽象、Prompt、工具註冊、Agent loop 與執行事件。
+- Vercel AI SDK 僅負責前端聊天狀態與串流呈現，不得再建立第二套工具迴圈。
+- LangGraph 不屬於 MVP；只有出現持久化工作流、分支圖、checkpoint 或多 Agent 需求時才重新評估。
 - 套件版本必須鎖定並以官方文件驗證相容性；設計文件不使用未驗證的模型檔名或浮動版本作為承諾。

@@ -15,6 +15,7 @@ const geocodingSchema = z.object({
     longitude: z.number(),
     timezone: z.string(),
     country: z.string().optional(),
+    country_code: z.string().optional(),
     admin1: z.string().optional(),
   })).optional(),
 });
@@ -47,25 +48,57 @@ export type WeatherResult = {
 
 const cache = new MemoryCache<WeatherResult>(5 * 60_000);
 
-const taiwanLocationAliases: Record<string, string> = {
-  "臺北市": "Taipei", "台北市": "Taipei", "新北市": "New Taipei", "桃園市": "Taoyuan",
-  "臺中市": "Taichung", "台中市": "Taichung", "臺南市": "Tainan", "台南市": "Tainan",
-  "高雄市": "Kaohsiung", "基隆市": "Keelung", "新竹市": "Hsinchu", "嘉義市": "Chiayi",
-  "新竹縣": "Hsinchu", "苗栗縣": "Miaoli", "彰化縣": "Changhua", "南投縣": "Nantou",
-  "雲林縣": "Yunlin", "嘉義縣": "Chiayi", "屏東縣": "Pingtung", "宜蘭縣": "Yilan",
-  "花蓮縣": "Hualien", "臺東縣": "Taitung", "台東縣": "Taitung", "澎湖縣": "Penghu",
-  "金門縣": "Kinmen", "連江縣": "Lienchiang",
-};
+type TaiwanLocation = { canonical: string; query: string; aliases: string[] };
+
+const taiwanLocations: TaiwanLocation[] = [
+  { canonical: "臺北市", query: "Taipei", aliases: ["臺北", "臺北市"] },
+  { canonical: "新北市", query: "New Taipei", aliases: ["新北", "新北市"] },
+  { canonical: "桃園市", query: "Taoyuan", aliases: ["桃園", "桃園市"] },
+  { canonical: "臺中市", query: "Taichung", aliases: ["臺中", "臺中市"] },
+  { canonical: "臺南市", query: "Tainan", aliases: ["臺南", "臺南市"] },
+  { canonical: "高雄市", query: "Kaohsiung", aliases: ["高雄", "高雄市"] },
+  { canonical: "基隆市", query: "Keelung", aliases: ["基隆", "基隆市"] },
+  { canonical: "新竹市", query: "Hsinchu", aliases: ["新竹", "新竹市"] },
+  { canonical: "嘉義市", query: "Chiayi", aliases: ["嘉義", "嘉義市"] },
+  { canonical: "新竹縣", query: "Zhubei", aliases: ["新竹縣"] },
+  { canonical: "苗栗縣", query: "Miaoli", aliases: ["苗栗", "苗栗縣"] },
+  { canonical: "彰化縣", query: "Changhua", aliases: ["彰化", "彰化縣"] },
+  { canonical: "南投縣", query: "Nantou", aliases: ["南投", "南投縣"] },
+  { canonical: "雲林縣", query: "Douliu", aliases: ["雲林", "雲林縣"] },
+  { canonical: "嘉義縣", query: "Taibao", aliases: ["嘉義縣"] },
+  { canonical: "屏東縣", query: "Pingtung", aliases: ["屏東", "屏東縣"] },
+  { canonical: "宜蘭縣", query: "Yilan", aliases: ["宜蘭", "宜蘭縣"] },
+  { canonical: "花蓮縣", query: "Hualien", aliases: ["花蓮", "花蓮縣"] },
+  { canonical: "臺東縣", query: "Taitung", aliases: ["臺東", "臺東縣"] },
+  { canonical: "澎湖縣", query: "Magong", aliases: ["澎湖", "澎湖縣"] },
+  { canonical: "金門縣", query: "Jincheng", aliases: ["金門", "金門縣"] },
+  { canonical: "連江縣", query: "Nangan", aliases: ["連江", "連江縣", "馬祖"] },
+];
+
+function normalizeTaiwanName(location: string): string {
+  return location.trim().replaceAll("台", "臺").replaceAll(/\s+/g, "");
+}
+
+const taiwanLocationByAlias = new Map(
+  taiwanLocations.flatMap((entry) => entry.aliases.map((alias) => [normalizeTaiwanName(alias), entry] as const)),
+);
+
+export function resolveTaiwanLocation(location: string): TaiwanLocation | undefined {
+  return taiwanLocationByAlias.get(normalizeTaiwanName(location));
+}
 
 export function getGeocodingQueries(location: string): string[] {
-  const alias = taiwanLocationAliases[location];
-  const withoutAdministrativeSuffix = location.replace(/[市縣區鄉鎮]$/, "");
-  return [...new Set([location, alias, withoutAdministrativeSuffix].filter((value): value is string => Boolean(value)))];
+  const normalized = normalizeTaiwanName(location);
+  const taiwanLocation = resolveTaiwanLocation(normalized);
+  const withoutAdministrativeSuffix = normalized.replace(/[市縣區鄉鎮]$/, "");
+  return [...new Set([location, taiwanLocation?.query, normalized, withoutAdministrativeSuffix]
+    .filter((value): value is string => Boolean(value)))];
 }
 
 export async function getWeather(input: z.infer<typeof weatherInputSchema>, signal?: AbortSignal): Promise<WeatherResult> {
   const parsed = weatherInputSchema.parse(input);
-  const cacheKey = parsed.location.toLocaleLowerCase("zh-TW");
+  const taiwanLocation = resolveTaiwanLocation(parsed.location);
+  const cacheKey = (taiwanLocation?.canonical ?? parsed.location).toLocaleLowerCase("zh-TW");
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
@@ -74,11 +107,13 @@ export async function getWeather(input: z.infer<typeof weatherInputSchema>, sign
   for (const query of getGeocodingQueries(parsed.location)) {
     const geoUrl = new URL("https://geocoding-api.open-meteo.com/v1/search");
     geoUrl.searchParams.set("name", query);
-    geoUrl.searchParams.set("count", "1");
+    geoUrl.searchParams.set("count", taiwanLocation ? "5" : "1");
     geoUrl.searchParams.set("language", "zh");
     geoUrl.searchParams.set("format", "json");
     const geo = geocodingSchema.parse(await fetchJson(geoUrl.toString(), timeout, signal));
-    location = geo.results?.[0];
+    location = taiwanLocation
+      ? geo.results?.find((result) => result.country_code?.toUpperCase() === "TW")
+      : geo.results?.[0];
     if (location) break;
   }
   if (!location) throw new Error("找不到指定地點");
@@ -89,7 +124,8 @@ export async function getWeather(input: z.infer<typeof weatherInputSchema>, sign
   forecastUrl.searchParams.set("timezone", "auto");
   forecastUrl.searchParams.set("current", "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code");
   const forecast = forecastSchema.parse(await fetchJson(forecastUrl.toString(), timeout, signal));
-  const displayLocation = [location.name, location.admin1, location.country].filter(Boolean).join("，");
+  const displayLocation = taiwanLocation?.canonical
+    ?? [location.name, location.admin1, location.country].filter(Boolean).join("，");
   const props = {
     location: displayLocation,
     timezone: forecast.timezone,

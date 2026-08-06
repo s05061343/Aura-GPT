@@ -64,6 +64,8 @@ type UIBlock =
 ## MVP 正式工具
 
 - `get_weather`：使用 Open-Meteo geocoding 與 current forecast，輸入地點並輸出版本 1 WeatherCard。
+- `get_weather` 會正規化臺灣全部縣市的「台／臺」、完整行政區名與常見省略尾碼寫法；新竹與嘉義的無尾碼簡稱預設指市，明確輸入「縣」時則使用縣政府所在地作代表座標。臺灣別名查詢只接受國別為 `TW` 的 geocoding 結果。
+- 天氣工具失敗時回傳受控的結構化錯誤，不得將 LangChain 的原始 `Error` 或 `Please fix your mistakes` 提示顯示在 UI。
 - `get_tw_stock_quote`：使用 TWSE 與 TPEx 官方 OpenAPI，依股票代碼或名稱查詢上市／上櫃最新收盤價，輸出版本 1 StockQuoteCard。
 - 兩個工具都是 external read；每個 thread 第一次執行前以 LangChain HITL 暫停並要求批准，批准後該分頁不再重問。
 - 股票輸出必須標示資料日期、`realtime:false` 與「非投資建議」。

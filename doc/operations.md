@@ -16,6 +16,7 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 | 名稱 | 必要 | 用途 | 安全預設 |
 |---|---:|---|---|
 | `LLM_MODEL_PATH` | 是 | GGUF 模型絕對或專案相對路徑 | 啟動前驗證存在且為檔案 |
+| `LLM_BACKEND` | 否 | llama.cpp GPU 後端 | `auto`：HIP 優先、Vulkan 備援；亦可鎖定 `hip` 或 `vulkan` |
 | `LLM_SERVER_HOST` | 否 | 推論服務監聽位址 | `127.0.0.1` |
 | `LLM_SERVER_PORT` | 否 | 推論服務埠 | `8080` |
 | `LLM_CONTEXT_SIZE` | 否 | context window | 依已驗證模型 profile |
@@ -35,7 +36,9 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 
 ## 模型 profile
 
-第一個 profile 是官方 `Qwen/Qwen3-8B-GGUF` 的 Q4_K_M，目標為 NVIDIA 8–12GB。`runtime-manifest.json` 固定 llama.cpp release 與模型來源；setup 腳本從 GitHub/Hugging Face metadata 取得並驗證 SHA-256。
+第一個 profile 是官方 `Qwen/Qwen3-8B-GGUF` 的 Q4_K_M，目標為 Windows 11 與 AMD Radeon RX 9070 XT 16GB。`runtime-manifest.json` 固定 llama.cpp release、HIP／Vulkan 後端與模型來源；setup 腳本從 GitHub/Hugging Face metadata 取得並驗證 SHA-256。
+
+`setup-runtime.ps1` 預設安裝 HIP 與 Vulkan，分別放在 `.runtime/llama.cpp/hip` 和 `.runtime/llama.cpp/vulkan`，避免不同 backend 的 DLL 互相覆蓋。`LLM_BACKEND=auto` 先啟動 HIP，若 readiness 失敗才停止該程序並嘗試 Vulkan；明確指定 `hip` 或 `vulkan` 時不自動切換。Windows 的完整 ROCm stack 並非必要條件，官方 llama.cpp HIP package 可先搭配最新 AMD 驅動驗證；`rocminfo` 僅作額外診斷。
 
 - 顯示名稱、來源 URL、授權與 SHA-256。
 - 檔案名稱、量化方式及預估 RAM/VRAM。
@@ -45,7 +48,7 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 
 ## 啟動流程
 
-1. 驗證 Node、llama-server、模型檔與設定。
+1. 驗證 Node、HIP／Vulkan llama-server、AMD GPU、模型檔與設定。
 2. 確認埠未被占用，且監聽位址符合政策。
 3. 啟動 llama-server，等待 health/readiness 成功。
 4. 執行最小文字 smoke test；宣稱支援 tools 的模型再執行工具 smoke test。

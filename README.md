@@ -12,7 +12,7 @@ Aura-GPT 是以 LangChain.js 為核心、透過 llama.cpp 執行本機 Qwen3 GGU
 
 ## 開發環境
 
-需求：Windows、PowerShell、Node.js 24 LTS、NVIDIA 8–12GB VRAM，並可使用 CUDA 12.4 runtime。
+需求：Windows 11、PowerShell、Node.js 24 LTS，以及 AMD Radeon RX 9070 XT（16GB VRAM）或相容的 AMD GPU。預設使用 llama.cpp HIP 後端，啟動失敗時自動改用 Vulkan。
 
 ```powershell
 corepack pnpm install
@@ -34,7 +34,7 @@ Copy-Item .env.example .env
 .\scripts\smoke-test.ps1
 ```
 
-`setup-runtime.ps1` 會依 [runtime-manifest.json](runtime-manifest.json) 下載固定版本，且 SHA-256 不符時拒絕使用。模型與 runtime 不會加入 Git。
+`setup-runtime.ps1` 會依 [runtime-manifest.json](runtime-manifest.json) 同時準備 HIP 與 Vulkan 固定版本，且 SHA-256 不符時拒絕使用。模型與 runtime 不會加入 Git。可用 `-Backend hip` 或 `-Backend vulkan` 只安裝單一後端。
 
 ## 驗證
 

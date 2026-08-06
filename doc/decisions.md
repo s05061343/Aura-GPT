@@ -48,6 +48,13 @@
 - 決策：MVP 模型切換明確定義為 restart-and-verify，不實作 hot swap。
 - 後果：部署與 UI 不應暗示模型可零中斷切換。
 
+## ADR-007：Windows AMD runtime 採 HIP 優先、Vulkan 備援
+
+- 狀態：Accepted
+- 背景：目標硬體為 AMD Radeon RX 9070 XT，CUDA runtime 無法使用；llama.cpp 官方 Windows release 同時提供 HIP 與 Vulkan。
+- 決策：setup 預設安裝隔離的 HIP 與 Vulkan binaries；啟動採 HIP 優先，僅在 `auto` 模式 readiness 失敗時改用 Vulkan。GGUF 模型由兩個後端共用。
+- 後果：manifest、啟動、診斷與 smoke evidence 必須記錄實際 backend；不得再把 NVIDIA CUDA 列為預設需求。
+
 ## 待決策清單
 
 | ID | 問題 | 阻擋階段 |
@@ -56,4 +63,4 @@
 | Q-002 | 僅目前分頁，以記憶體保存 30 分鐘 | 已決定 |
 | Q-003 | 每工具、每分頁首次授權 | 已決定 |
 | Q-004 | MVP 不使用 Docker，PowerShell-only | 已決定 |
-| Q-005 | Qwen3-8B Q4_K_M；NVIDIA 8–12GB | 已決定 |
+| Q-005 | Qwen3-8B Q4_K_M；AMD RX 9070 XT 16GB；HIP 優先、Vulkan 備援 | 已決定 |

@@ -9,7 +9,7 @@
 - 已完成 Next.js、LangChain Agent runtime、AI SDK transport、HITL 授權、天氣／台股工具、Generative UI、PowerShell 維運腳本與自動化測試。
 - 已通過 typecheck、lint、12 項 unit/contract tests、production build 與 Chromium E2E。
 - TWSE、TPEx、Open-Meteo 官方 API 已完成真實回應契約驗證。
-- 尚需在 Node.js 24 與目標 NVIDIA 8–12GB 硬體下載 runtime/model，執行文字與 Tool Calling smoke test，才能完成模型 profile 驗收。
+- 已將 Windows runtime 修正為 AMD RX 9070 XT 的 HIP 預設、Vulkan 備援；尚需在 Node.js 24 與目標硬體完成模型下載，並分別記錄文字與 Tool Calling smoke test，才能完成模型 profile 驗收。
 
 ## Phase 0：決策與環境基線
 

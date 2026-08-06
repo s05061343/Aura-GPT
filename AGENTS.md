@@ -10,6 +10,7 @@
 - 模型輸出永遠視為不可信輸入。工具參數必須驗證，Generative UI 只能使用白名單元件，不得執行模型生成的 HTML、JavaScript 或指令。
 - 不把 `.env`、模型檔、對話資料、金鑰或執行紀錄提交至版本控制。
 - 優先維持 Windows PowerShell 可用；若提供 Bash 操作，需同步提供等價 PowerShell 或跨平台方式。
+- 目標 GPU 是 AMD Radeon RX 9070 XT；Windows runtime 預設 HIP、Vulkan 備援，不得引入 NVIDIA CUDA 作為預設依賴。
 
 ## 文件讀取路由
 

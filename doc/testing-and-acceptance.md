@@ -36,6 +36,8 @@
 ### Model compatibility
 
 - 每個受支援 profile 執行固定 smoke suite。
+- 驗證 RX 9070 XT 的 HIP readiness；模擬 HIP 啟動失敗時，`auto` 模式必須停止失敗程序並切換 Vulkan。
+- 明確指定 `hip` 或 `vulkan` 時不得靜默切換後端；測試證據必須記錄實際 backend。
 - 測試結果包含模型 checksum、llama.cpp 版本、硬體與時間。
 - 模型未通過工具測試時仍可標記為 `chat-only`，不可宣稱完整相容。
 

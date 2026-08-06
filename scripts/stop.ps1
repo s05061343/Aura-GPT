@@ -12,3 +12,5 @@ foreach ($name in @('web', 'llama')) {
     }
     Remove-Item -LiteralPath $pidPath
 }
+$activeBackendPath = Assert-WithinAuraRoot (Join-Path $root '.runtime\active-backend.txt')
+if (Test-Path -LiteralPath $activeBackendPath) { Remove-Item -LiteralPath $activeBackendPath }

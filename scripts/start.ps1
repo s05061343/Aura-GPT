@@ -23,7 +23,11 @@ $port = if ($env:LLM_SERVER_PORT) { [int]$env:LLM_SERVER_PORT } else { 8080 }
 $context = if ($env:LLM_CONTEXT_SIZE) { [int]$env:LLM_CONTEXT_SIZE } else { 8192 }
 $gpuLayers = if ($env:LLM_GPU_LAYERS) { [int]$env:LLM_GPU_LAYERS } else { 99 }
 
-$llamaArgs = @('-m', $modelPath, '--host', $hostName, '--port', "$port", '-c', "$context", '--n-gpu-layers', "$gpuLayers", '--alias', 'aura-local', '--jinja', '-np', '1')
+# Windows PowerShell 5.1 joins Start-Process ArgumentList entries into one
+# command line. Quote the model path explicitly so workspace paths containing
+# spaces remain a single llama-server argument.
+$quotedModelPath = '"' + $modelPath + '"'
+$llamaArgs = @('-m', $quotedModelPath, '--host', $hostName, '--port', "$port", '-c', "$context", '--n-gpu-layers', "$gpuLayers", '--alias', 'aura-local', '--jinja', '-np', '1')
 $llama = $null
 $activeBackend = $null
 foreach ($backendName in $backendCandidates) {

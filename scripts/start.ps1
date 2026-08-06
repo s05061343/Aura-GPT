@@ -53,7 +53,8 @@ if (-not $llama) { throw 'No usable llama.cpp backend. Run scripts/setup-runtime
 Set-Content -LiteralPath (Join-Path $pidDir 'llama.pid') -Value $llama.Id
 Set-Content -LiteralPath (Join-Path $runtimeDir 'active-backend.txt') -Value $activeBackend
 
-$web = Start-Process -FilePath 'corepack.exe' -ArgumentList @('pnpm', 'dev') -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logDir 'web.out.log') -RedirectStandardError (Join-Path $logDir 'web.err.log')
+$corepackCommand = Get-Command 'corepack' -ErrorAction Stop
+$web = Start-Process -FilePath $corepackCommand.Source -ArgumentList @('pnpm', 'dev') -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logDir 'web.out.log') -RedirectStandardError (Join-Path $logDir 'web.err.log')
 Set-Content -LiteralPath (Join-Path $pidDir 'web.pid') -Value $web.Id
 Wait-HttpReady -Url 'http://127.0.0.1:3000/api/status' -TimeoutSeconds 120
 Write-Host "Aura-GPT started with $activeBackend backend: http://127.0.0.1:3000"

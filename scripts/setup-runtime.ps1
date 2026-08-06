@@ -74,6 +74,14 @@ if (-not $SkipModel) {
     $modelUrl = "https://huggingface.co/$repo/resolve/$revision/$file"
     $modelPath = Assert-WithinAuraRoot (Join-Path $modelsDir $file)
     Get-VerifiedFile -Url $modelUrl -Destination $modelPath -ExpectedSha256 ([string]$modelEntry.lfs.oid)
+
+    $manifestHash = (Get-FileHash -LiteralPath (Join-Path $root 'runtime-manifest.json') -Algorithm SHA256).Hash.ToLowerInvariant()
+    $setupMarker = Assert-WithinAuraRoot (Join-Path $root '.runtime\setup-complete.json')
+    @{
+        manifestSha256 = $manifestHash
+        completedAt = [DateTime]::UtcNow.ToString('o')
+        modelSha256 = ([string]$modelEntry.lfs.oid).ToLowerInvariant()
+    } | ConvertTo-Json | Set-Content -LiteralPath $setupMarker -Encoding UTF8
 }
 
 Write-Host 'Aura-GPT runtime setup completed.'

@@ -14,6 +14,8 @@ Aura-GPT 是以 LangChain.js 為核心、透過 llama.cpp 執行本機 Qwen3 GGU
 
 需求：Windows 11、PowerShell、Node.js 24 LTS，以及 AMD Radeon RX 9070 XT（16GB VRAM）或相容的 AMD GPU。預設使用 llama.cpp HIP 後端，啟動失敗時自動改用 Vulkan。
 
+最簡單的方式是雙擊根目錄的 `run.bat`。它會檢查 Node.js、建立 `.env`、在必要時安裝套件及下載已驗證的 runtime/model，啟動後自動開啟瀏覽器。停止時雙擊 `stop.bat`。
+
 ```powershell
 corepack pnpm install
 Copy-Item .env.example .env

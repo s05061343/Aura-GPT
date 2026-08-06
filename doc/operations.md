@@ -11,6 +11,8 @@ MVP 由兩個本機程序組成：
 
 MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime setup、start、stop、diagnose 與 smoke-test。
 
+一般使用者可雙擊根目錄 `run.bat`；它呼叫 `scripts/run.ps1` 執行前置檢查，並以 `.runtime/setup-complete.json` 中的 manifest SHA-256 判斷 runtime/model 是否已完成驗證。manifest 改變或標記不存在時會重新執行 setup。`stop.bat` 僅停止由本專案 PID 檔記錄的程序。
+
 ## 環境變數
 
 | 名稱 | 必要 | 用途 | 安全預設 |

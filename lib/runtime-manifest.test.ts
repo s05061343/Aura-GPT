@@ -16,6 +16,11 @@ const startScript = readFileSync(
   new URL("../scripts/start.ps1", import.meta.url),
   "utf8",
 );
+const runScript = readFileSync(
+  new URL("../scripts/run.ps1", import.meta.url),
+  "utf8",
+);
+const runBatch = readFileSync(new URL("../run.bat", import.meta.url), "utf8");
 
 describe("runtime manifest", () => {
   it("uses HIP by default and Vulkan as the fallback", () => {
@@ -39,5 +44,14 @@ describe("runtime manifest", () => {
     expect(startScript).toContain("$manifest.llamaCpp.fallbackBackend");
     expect(startScript).toContain("Stop-Process -Id $candidate.Id -Force");
     expect(startScript).toContain("if ($requestedBackend -ne 'auto') { throw }");
+  });
+
+  it("keeps one-click startup tied to a verified manifest marker", () => {
+    expect(runScript).toContain(".runtime\\setup-complete.json");
+    expect(runScript).toContain("manifestSha256");
+    expect(runScript).toContain("setup-runtime.ps1");
+    expect(runScript).toContain("Node.js 24 or newer is required");
+    expect(runBatch).toContain("-ExecutionPolicy Bypass");
+    expect(runBatch).toContain("scripts\\run.ps1");
   });
 });

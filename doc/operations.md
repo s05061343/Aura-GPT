@@ -9,7 +9,7 @@ MVP 由兩個本機程序組成：
 1. `llama-server`：載入一個 GGUF 模型並監聽 loopback。
 2. Next.js：提供 UI、Chat API、LangChain Agent runtime 與工具執行。
 
-正式建立專案時應提供 PowerShell 啟動腳本；可另外提供 Bash，兩者共用相同設定語意。Docker Compose 是否加入留待實作階段確認。
+MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime setup、start、stop、diagnose 與 smoke-test。
 
 ## 環境變數
 
@@ -25,12 +25,17 @@ MVP 由兩個本機程序組成：
 | `AGENT_MAX_STEPS` | 否 | 單輪模型步數 | `5`，並設程式硬上限 |
 | `TOOL_TIMEOUT_MS` | 否 | 一般工具 timeout | `15000` |
 | `LOG_LEVEL` | 否 | log 詳細程度 | `info` |
+| `AGENT_MAX_TOOL_CALLS` | 否 | 單輪工具呼叫上限 | `4` |
+| `SESSION_TTL_MS` | 否 | 記憶體 thread 閒置期限 | `1800000` |
+| `LANGSMITH_TRACING` | 否 | 啟用完整 LangSmith trace | `true` |
+| `LANGSMITH_PROJECT` | 否 | LangSmith project | `aura-gpt-local` |
+| `LANGSMITH_API_KEY` | 否 | LangSmith 金鑰 | 未設定時降級本機 metadata log |
 
 `.env.example` 未來只放非秘密範例；`.env*` 的實際秘密版本與 `models/` 必須忽略。環境變數解析應使用可靠函式庫或 framework 機制，不使用 `export $(grep ... | xargs)`。
 
 ## 模型 profile
 
-不要以任意檔名代表相容性。每個支援模型應有一份 profile，至少記錄：
+第一個 profile 是官方 `Qwen/Qwen3-8B-GGUF` 的 Q4_K_M，目標為 NVIDIA 8–12GB。`runtime-manifest.json` 固定 llama.cpp release 與模型來源；setup 腳本從 GitHub/Hugging Face metadata 取得並驗證 SHA-256。
 
 - 顯示名稱、來源 URL、授權與 SHA-256。
 - 檔案名稱、量化方式及預估 RAM/VRAM。

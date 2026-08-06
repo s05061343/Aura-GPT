@@ -1,0 +1,27 @@
+# dependencies and Next.js
+node_modules/
+.next/
+out/
+
+# local runtime and model artifacts
+.runtime/
+models/
+logs/
+
+# environment and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# tests and editors
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.vscode/
+.idea/
+
+# operating system
+.DS_Store
+Thumbs.db

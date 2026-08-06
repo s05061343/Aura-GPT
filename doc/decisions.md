@@ -20,12 +20,12 @@
 - 後果：必須建立明確的 LangChain model adapter、agent runtime 介面與 stream protocol adapter；不得在 route 或 UI 重複實作工具迴圈。
 - 重新評估條件：若 LangChain 無法穩定支援目標 llama-server API 或造成不可接受的效能與維護成本，需以契約測試及 ADR 證據重新決策。
 
-## ADR-006：MVP 不引入 LangGraph
+## ADR-006：不建立自訂 LangGraph，但使用 LangChain 內建 runtime
 
-- 狀態：Proposed
-- 背景：保留 LangChain 不代表必須立即採用圖式、持久化工作流。
-- 決策：MVP 使用 LangChain 的 Agent/runtime 能力；LangGraph 延後評估。
-- 重新評估條件：需要可恢復 checkpoint、明確分支圖、人機中斷續跑或多 Agent 協作。
+- 狀態：Accepted
+- 背景：LangChain 1.x `createAgent()` 內部使用 LangGraph runtime，HITL 也需要 checkpointer。
+- 決策：MVP 不自行建立 graph，但直接使用 LangChain 的內建 runtime、middleware、interrupt 與記憶體 checkpointer。
+- 重新評估條件：需要永久 checkpoint、明確自訂分支圖或多 Agent 協作。
 
 ## ADR-003：以 adapter 宣稱有限模型相容性
 
@@ -52,8 +52,8 @@
 
 | ID | 問題 | 阻擋階段 |
 |---|---|---|
-| Q-001 | 第一個正式工具是什麼？ | Phase 2 |
-| Q-002 | 對話是否保存；若保存，位置與期限為何？ | Phase 1 後續設計 |
-| Q-003 | 外部工具使用逐次、每工具或全域授權？ | Phase 2 |
-| Q-004 | 是否以 Docker Compose 作為第二種支援啟動方式？ | Phase 4 |
-| Q-005 | 第一個支援模型及目標硬體規格？ | Phase 0 |
+| Q-001 | 天氣與臺股最新官方收盤價 | 已決定 |
+| Q-002 | 僅目前分頁，以記憶體保存 30 分鐘 | 已決定 |
+| Q-003 | 每工具、每分頁首次授權 | 已決定 |
+| Q-004 | MVP 不使用 Docker，PowerShell-only | 已決定 |
+| Q-005 | Qwen3-8B Q4_K_M；NVIDIA 8–12GB | 已決定 |

@@ -95,7 +95,7 @@ llama-server ────────────── one configured GGUF mode
 - UI 串流：Vercel AI SDK 僅處理前端聊天狀態與呈現；由 protocol adapter 消費應用串流事件。
 - Schema：Zod，工具執行期驗證與 TypeScript 型別共用來源。
 - 推論：llama.cpp 的 `llama-server`。
-- LangGraph：MVP 不預設引入。持久化分支工作流、checkpoint、多 Agent 或複雜狀態機成為確認需求後，再用 ADR 評估。
+- LangGraph：不建立自訂 graph；僅使用 LangChain `createAgent()` 內建 runtime 與 HITL 所需的記憶體 checkpointer。永久 checkpoint、多 Agent 或自訂分支圖需另立 ADR。
 
 ## 演進邊界
 

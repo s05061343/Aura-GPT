@@ -61,6 +61,9 @@ type UIBlock =
 - 工具失敗：若安全且合理，可提供非即時的一般回答，但必須揭露工具失敗。
 - UI block 無法渲染：保留文字答案，不能讓整則訊息消失。
 
-## 首個工具的選擇條件
+## MVP 正式工具
 
-首個正式工具尚待確認。建議挑選唯讀、輸入簡單、有明確結果 schema、容易建立 mock 且不涉及敏感資料的工具，以驗證完整 Agent loop，而不是追求功能數量。
+- `get_weather`：使用 Open-Meteo geocoding 與 current forecast，輸入地點並輸出版本 1 WeatherCard。
+- `get_tw_stock_quote`：使用 TWSE 與 TPEx 官方 OpenAPI，依股票代碼或名稱查詢上市／上櫃最新收盤價，輸出版本 1 StockQuoteCard。
+- 兩個工具都是 external read；每個 thread 第一次執行前以 LangChain HITL 暫停並要求批准，批准後該分頁不再重問。
+- 股票輸出必須標示資料日期、`realtime:false` 與「非投資建議」。

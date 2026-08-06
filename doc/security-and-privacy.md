@@ -9,10 +9,10 @@
 ## 隱私承諾
 
 - 預設推論在本機完成，llama-server 預設只監聽 loopback。
-- 未啟用外部工具時，對話不得由應用主動送至外部服務。
+- 模型推論不離開本機；若設定 `LANGSMITH_API_KEY` 且 tracing 開啟，Prompt、回覆與工具資料會送往 LangSmith，UI 必須持續顯示此狀態。
 - 外部工具執行前，介面應顯示工具名稱、目的與預計送出的資料摘要。
-- 預設 log 不記錄完整 Prompt、模型回覆、工具秘密或未遮蔽的個人資料。
-- 若未來加入遙測，必須 opt-in、可關閉，並另行記錄資料項目與保存期限。
+- LangSmith 完整 trace 不得包含 API keys、authorization headers 或環境秘密；沒有金鑰時，本機 log 不記錄完整 Prompt、模型回覆或工具內容。
+- `LANGSMITH_TRACING=false` 可明確停用遠端 tracing；缺少金鑰時不得阻止本機聊天啟動。
 
 ## 主要威脅與控制
 

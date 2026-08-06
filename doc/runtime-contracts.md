@@ -6,33 +6,29 @@
 
 ## Chat request
 
+`POST /api/chat` 接受 discriminated union：
+
 ```ts
-type ChatRequest = {
-  conversationId?: string;
-  messages: Array<{
-    id: string;
-    role: "user" | "assistant";
-    content: string;
-  }>;
-  enabledTools?: string[];
-};
+type ChatCommand =
+  | { type: "message"; threadId: UUID; requestId: UUID; messageId: UUID; text: string }
+  | { type: "approval"; threadId: UUID; requestId: UUID; approvalId: string; decision: "approve" | "reject" };
 ```
 
 限制：
 
-- 不接受客戶端偽造的 `system` 或 `tool` 訊息。
+- 不接受客戶端歷史訊息或偽造的 `system`、`assistant`、`tool` 訊息；短期歷史由 LangChain 記憶體 checkpointer 管理。
 - 訊息數、單則長度與總 payload 必須設上限。
-- `enabledTools` 只是使用者授權範圍，伺服器仍需套用自己的 allowlist。
+- `DELETE /api/chat?threadId=<uuid>` 清除目前分頁的 checkpoint 與工具授權。
 
 ## 串流事件
 
-LangChain callback/event stream 必須先轉為下列應用事件。HTTP adapter 可再編碼成前端 AI SDK 可消費的 wire protocol，但 UI 不直接依賴 LangChain 內部事件形狀：
+LangChain callback/event stream 先轉為 NDJSON `AuraEvent`，再由自訂 AI SDK `ChatTransport` 轉為 `UIMessageChunk`；UI 不依賴 LangChain 內部事件形狀：
 
 ```ts
 type AuraStreamEvent =
   | { type: "message-start"; messageId: string }
   | { type: "text-delta"; messageId: string; delta: string }
-  | { type: "tool-awaiting-approval"; callId: string; tool: string; summary: string }
+  | { type: "tool-awaiting-approval"; approvalId: string; callId: string; tool: string; summary: string; arguments: object }
   | { type: "tool-start"; callId: string; tool: string }
   | { type: "tool-result"; callId: string; tool: string; data: unknown; ui?: UIBlock }
   | { type: "tool-error"; callId: string; tool: string; error: PublicError }
@@ -86,10 +82,10 @@ type PublicError = {
 
 ## 對話與 context
 
-- MVP 可先採客戶端帶回歷史訊息，但伺服器必須重新驗證，且不得信任客戶端工具結果。
+- MVP 使用記憶體 checkpointer 保存目前分頁的短期歷史，閒置 30 分鐘清除；瀏覽器不回傳歷史或工具結果。
 - 超過 context 預算時，保留 system policy 與最近訊息；摘要策略須另行測試後才啟用。
 - token 預算應保留輸出與工具結果空間，不可把完整 context 全部用於輸入。
-- 是否持久化對話仍是產品待決事項。
+- 不持久化對話；重新整理即建立新 thread。
 
 ## 相容性檢查
 

@@ -6,7 +6,7 @@
 
 - 與使用者溝通及專案文件預設使用繁體中文；程式識別字、協議名稱與必要術語保留英文。
 - 修改前先確認需求、影響範圍與驗收條件；若文件沒有答案，不自行把重大產品或架構假設視為定案。
-- 本機推論是預設路徑。任何可能將 Prompt、對話或工具參數送往外部服務的功能，都必須明確揭露並經使用者啟用。
+- 本機推論是預設路徑。LangSmith 在有金鑰時預設上傳完整 Agent trace，UI 必須明確揭露；其他外部工具仍需在每分頁首次使用前確認。
 - 模型輸出永遠視為不可信輸入。工具參數必須驗證，Generative UI 只能使用白名單元件，不得執行模型生成的 HTML、JavaScript 或指令。
 - 不把 `.env`、模型檔、對話資料、金鑰或執行紀錄提交至版本控制。
 - 優先維持 Windows PowerShell 可用；若提供 Bash 操作，需同步提供等價 PowerShell 或跨平台方式。
@@ -37,5 +37,5 @@
 - 「模型切換」初期代表重新啟動推論服務，不宣稱支援 hot swap。
 - LangChain.js 是核心且唯一的 Agent 編排層，負責模型抽象、Prompt、工具註冊、Agent loop 與執行事件。
 - Vercel AI SDK 僅負責前端聊天狀態與串流呈現，不得再建立第二套工具迴圈。
-- LangGraph 不屬於 MVP；只有出現持久化工作流、分支圖、checkpoint 或多 Agent 需求時才重新評估。
+- 不建立自訂 LangGraph；允許 LangChain `createAgent()` 內建的 LangGraph runtime、middleware、interrupt 與記憶體 checkpointer。
 - 套件版本必須鎖定並以官方文件驗證相容性；設計文件不使用未驗證的模型檔名或浮動版本作為承諾。

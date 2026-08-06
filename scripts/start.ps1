@@ -37,12 +37,27 @@ foreach ($backendName in $backendCandidates) {
         Write-Warning "llama.cpp backend is not installed: $backendName"
         continue
     }
+    if ($backendName -eq 'hip') {
+        $rocmBin = Enable-RocmRuntime
+        if ($rocmBin) { Write-Host "Using ROCm runtime: $rocmBin" }
+        else { Write-Warning 'ROCm runtime containing amdhip64_7.dll was not found.' }
+    }
+    $devices = @(Get-LlamaDevices -ServerPath $llamaServer.FullName)
+    if ($devices.Count -eq 0) {
+        $message = "llama.cpp backend '$backendName' did not detect a GPU device."
+        if ($requestedBackend -ne 'auto') { throw $message }
+        Write-Warning "$message Trying the fallback backend."
+        continue
+    }
+    $deviceName = ($devices[0] -split ':', 2)[0]
+    Write-Host "Detected llama.cpp device ($backendName): $($devices -join '; ')"
     Write-Host "Starting llama.cpp backend: $backendName"
     $stdout = Join-Path $logDir "llama-$backendName.out.log"
     $stderr = Join-Path $logDir "llama-$backendName.err.log"
-    $candidate = Start-Process -FilePath $llamaServer.FullName -ArgumentList $llamaArgs -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    $candidateArgs = @($llamaArgs) + @('--device', $deviceName)
+    $candidate = Start-Process -FilePath $llamaServer.FullName -ArgumentList $candidateArgs -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     try {
-        Wait-HttpReady -Url "http://${hostName}:$port/health" -TimeoutSeconds 180
+        Wait-ProcessHttpReady -Url "http://${hostName}:$port/health" -Process $candidate -TimeoutSeconds 180
         $llama = $candidate
         $activeBackend = $backendName
         break

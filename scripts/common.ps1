@@ -30,9 +30,56 @@ function Read-DotEnv {
     }
 }
 
+function Get-LlamaDevices([string]$ServerPath) {
+    if (-not (Test-Path -LiteralPath $ServerPath -PathType Leaf)) { return @() }
+    $output = @(& $ServerPath --list-devices 2>&1 | ForEach-Object { "$_" })
+    if ($LASTEXITCODE -ne 0) { return @() }
+    return @($output | Where-Object { $_ -match '^\s+\S+:\s+.+$' } | ForEach-Object { $_.Trim() })
+}
+
+function Get-RocmBin {
+    $candidates = @()
+    if ($env:ROCM_PATH) { $candidates += (Join-Path $env:ROCM_PATH 'bin') }
+    $rocmRoot = Join-Path $env:ProgramFiles 'AMD\ROCm'
+    if (Test-Path -LiteralPath $rocmRoot -PathType Container) {
+        $candidates += Get-ChildItem -LiteralPath $rocmRoot -Directory -ErrorAction SilentlyContinue |
+            Sort-Object { try { [version]$_.Name } catch { [version]'0.0' } } -Descending |
+            ForEach-Object { Join-Path $_.FullName 'bin' }
+    }
+    return $candidates |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_ 'amdhip64_7.dll') -PathType Leaf } |
+        Select-Object -First 1
+}
+
+function Enable-RocmRuntime {
+    $rocmBin = Get-RocmBin
+    if (-not $rocmBin) { return $null }
+    $pathEntries = @($env:Path -split ';' | Where-Object { $_ })
+    if ($rocmBin -notin $pathEntries) { $env:Path = "$rocmBin;$env:Path" }
+    return $rocmBin
+}
+
 function Wait-HttpReady([string]$Url, [int]$TimeoutSeconds = 120) {
     $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
     while ([DateTime]::UtcNow -lt $deadline) {
+        try {
+            $response = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 3
+            if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 500) { return }
+        } catch { Start-Sleep -Seconds 1 }
+    }
+    throw "Timed out waiting for service: $Url"
+}
+
+function Wait-ProcessHttpReady(
+    [string]$Url,
+    [System.Diagnostics.Process]$Process,
+    [int]$TimeoutSeconds = 120
+) {
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    while ([DateTime]::UtcNow -lt $deadline) {
+        if ($Process.HasExited) {
+            throw "Process exited before becoming ready (exit code $($Process.ExitCode)): $Url"
+        }
         try {
             $response = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 3
             if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 500) { return }

@@ -40,7 +40,13 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 
 第一個 profile 是官方 `Qwen/Qwen3-8B-GGUF` 的 Q4_K_M，目標為 Windows 11 與 AMD Radeon RX 9070 XT 16GB。`runtime-manifest.json` 固定 llama.cpp release、HIP／Vulkan 後端與模型來源；setup 腳本從 GitHub/Hugging Face metadata 取得並驗證 SHA-256。
 
-`setup-runtime.ps1` 預設安裝 HIP 與 Vulkan，分別放在 `.runtime/llama.cpp/hip` 和 `.runtime/llama.cpp/vulkan`，避免不同 backend 的 DLL 互相覆蓋。`LLM_BACKEND=auto` 先啟動 HIP，若 readiness 失敗才停止該程序並嘗試 Vulkan；明確指定 `hip` 或 `vulkan` 時不自動切換。Windows 的完整 ROCm stack 並非必要條件，官方 llama.cpp HIP package 可先搭配最新 AMD 驅動驗證；`rocminfo` 僅作額外診斷。
+`setup-runtime.ps1` 預設安裝 HIP 與 Vulkan，分別放在 `.runtime/llama.cpp/hip` 和 `.runtime/llama.cpp/vulkan`，避免不同 backend 的 DLL 互相覆蓋。啟動時先以 `llama-server --list-devices` 驗證 backend 確實看見 GPU；`LLM_BACKEND=auto` 先嘗試 HIP，若沒有 GPU 裝置或 readiness 失敗，才停止該程序並嘗試 Vulkan。明確指定 `hip` 或 `vulkan` 時不自動切換，也不允許靜默退化為 CPU。Windows 的完整 ROCm stack 並非必要條件，官方 llama.cpp HIP package 可先搭配最新 AMD 驅動驗證；`rocminfo` 僅作額外診斷。
+
+Windows HIP 套件的 `ggml-hip.dll` 依賴對應的 ROCm runtime。啟動腳本會優先採用 `ROCM_PATH\bin`，否則從 `%ProgramFiles%\AMD\ROCm\*\bin` 選擇最新且包含 `amdhip64_7.dll` 的版本，加入目前 llama-server 程序的 DLL 搜尋路徑；不修改系統 PATH。
+
+若 backend 程序在 readiness 前退出，啟動流程會立即記錄其 stderr 並進入 fallback 或回報失敗，不會繼續等待完整 timeout。`--list-devices` 能看到顯卡只代表枚舉成功；模型載入 log 仍須出現 GPU device 與 layer offload 證據，才可判定 GPU profile 驗收通過。
+
+通過裝置驗證後，啟動腳本會將第一個已驗證裝置以 `--device` 明確傳給 llama-server，避免多 GPU、虛擬顯示裝置或 backend 預設順序造成選錯裝置。
 
 - 顯示名稱、來源 URL、授權與 SHA-256。
 - 檔案名稱、量化方式及預估 RAM/VRAM。

@@ -5,9 +5,13 @@ Write-Host "Workspace: $root"
 Write-Host "Node: $(node --version 2>$null)"
 Write-Host "pnpm: $(corepack pnpm --version 2>$null)"
 $runtimeRoot = Join-Path $root '.runtime\llama.cpp'
+$rocmBin = Enable-RocmRuntime
+Write-Host "ROCm runtime: $(if ($rocmBin) { $rocmBin } else { 'not found' })"
 foreach ($backendName in @('hip', 'vulkan')) {
     $server = Get-ChildItem -LiteralPath (Join-Path $runtimeRoot $backendName) -Recurse -Filter 'llama-server.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
     Write-Host "llama-server ($backendName): $(if ($server) { $server.FullName } else { 'missing' })"
+    $devices = if ($server) { @(Get-LlamaDevices -ServerPath $server.FullName) } else { @() }
+    Write-Host "llama devices ($backendName): $(if ($devices.Count -gt 0) { $devices -join '; ' } else { 'none detected' })"
 }
 $model = Join-Path $root 'models\Qwen3-8B-Q4_K_M.gguf'
 Write-Host "Model: $(if (Test-Path -LiteralPath $model) { (Get-FileHash -LiteralPath $model -Algorithm SHA256).Hash } else { 'missing' })"

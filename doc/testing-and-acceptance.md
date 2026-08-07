@@ -25,6 +25,9 @@
 - 工具授權、執行、結果卡片與 fallback。
 - 模型離線、工具失敗及重新整理後的預期行為。
 - 鍵盤操作、焦點、loading/error announcement 等基本可及性。
+- 桌面側欄收合與行動版 drawer 可操作；drawer 關閉時其中控制項不進入鍵盤焦點順序。
+- planned 功能入口呈現一致的「待補」或 disabled 狀態，不顯示虛構歷史、帳號或模型切換結果。
+- starter prompt 只填入 composer，不繞過正常送出、工具授權與 Agent runtime 流程。
 
 ### Security
 

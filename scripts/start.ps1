@@ -73,7 +73,14 @@ Set-Content -LiteralPath (Join-Path $pidDir 'llama.pid') -Value $llama.Id
 Set-Content -LiteralPath (Join-Path $runtimeDir 'active-backend.txt') -Value $activeBackend
 
 $corepackCommand = Get-Command 'corepack' -ErrorAction Stop
+$existingWebListener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
+if ($existingWebListener) {
+    throw "Port 3000 is already in use by PID $($existingWebListener[0].OwningProcess)."
+}
 $web = Start-Process -FilePath $corepackCommand.Source -ArgumentList @('pnpm', 'dev') -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logDir 'web.out.log') -RedirectStandardError (Join-Path $logDir 'web.err.log')
-Set-Content -LiteralPath (Join-Path $pidDir 'web.pid') -Value $web.Id
+Set-Content -LiteralPath (Join-Path $pidDir 'web-launcher.pid') -Value $web.Id
 Wait-HttpReady -Url 'http://127.0.0.1:3000/api/status' -TimeoutSeconds 120
+$webListener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction Stop |
+    Select-Object -First 1
+Set-Content -LiteralPath (Join-Path $pidDir 'web.pid') -Value $webListener.OwningProcess
 Write-Host "Aura-GPT started with $activeBackend backend: http://127.0.0.1:3000"

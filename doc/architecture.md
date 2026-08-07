@@ -35,6 +35,8 @@ llama-server ────────────── one configured GGUF mode
 - 管理輸入、訊息顯示、停止、重試及工具授權互動。
 - 僅渲染 Markdown 與白名單 UI component descriptor。
 - 不保存伺服器秘密，不直接呼叫 llama-server 或具權限的工具。
+- App Shell 採側欄、Topbar、對話工作區與 composer 分區；行動版側欄使用 modal drawer，關閉時不得留在鍵盤焦點順序。
+- 尚未實作的產品入口必須使用一致的 planned/disabled 狀態，不得以假歷史、假帳號或可操作控制項模擬完成能力。
 
 ### Next.js Chat API
 

@@ -10,6 +10,7 @@
 - 已通過 typecheck、lint、12 項 unit/contract tests、production build 與 Chromium E2E。
 - TWSE、TPEx、Open-Meteo 官方 API 已完成真實回應契約驗證。
 - 已將 Windows runtime 修正為 AMD RX 9070 XT 的 HIP 預設、Vulkan 備援；尚需在 Node.js 24 與目標硬體完成模型下載，並分別記錄文字與 Tool Calling smoke test，才能完成模型 profile 驗收。
+- 已將聊天 UI 升級為完整 AI 工作台 shell；現有聊天、工具與授權能力接入新版介面，延後能力以 planned/disabled 狀態保留入口。
 
 ## Phase 0：決策與環境基線
 

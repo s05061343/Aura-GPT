@@ -53,6 +53,14 @@ type UIBlock =
 - UI 元件本身不得因 render 自動觸發外部請求或副作用。
 - 工具原始回應不直接進入 component props，必須先正規化。
 
+## UI Shell 與功能狀態
+
+- 正式 UI 使用可收合桌面側欄、行動版 drawer、Topbar、對話工作區、starter prompts 與固定 composer。
+- Topbar 持續顯示實際模型 readiness 與 LangSmith tracing 狀態；啟用 tracing 時，完整資料上傳揭露不得藏入選單。
+- Composer 的 Tools 入口只顯示 registry 中既有工具及授權說明，不得在 UI 建立第二套工具選擇或執行迴圈。
+- 對話持久化／搜尋、帳號、附件與模型設定尚未實作時，入口保留但標示「待補」並 disabled；不得提供假資料或無回饋的可點擊控制項。
+- 模型名稱可唯讀顯示；在 restart-and-verify UI 完成前，不得以 selector 暗示 hot swap。
+
 ## Fallback
 
 - 沒有適合工具：直接以模型知識回答，並避免暗示已取得即時資料。

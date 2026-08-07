@@ -10,8 +10,8 @@ export function ApprovalDialog({ approval, busy, onDecision }: { approval?: Appr
   return (
     <Dialog.Root open={Boolean(approval)}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-slate-950/45 backdrop-blur-sm" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 w-[min(92vw,32rem)] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-white p-6 shadow-2xl focus:outline-none" aria-describedby="approval-description">
+        <Dialog.Overlay className="fixed inset-0 z-[80] bg-slate-950/45 backdrop-blur-sm" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-[90] w-[min(92vw,32rem)] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-white p-6 shadow-2xl focus:outline-none" aria-describedby="approval-description">
           <div className="flex items-start justify-between"><ShieldCheck className="size-9 text-violet-600" /><Dialog.Close asChild><button className="rounded-lg p-2 text-slate-500" onClick={() => onDecision("reject")} aria-label="拒絕並關閉"><X /></button></Dialog.Close></div>
           <Dialog.Title className="mt-4 text-xl font-bold">允許外部工具？</Dialog.Title>
           <Dialog.Description id="approval-description" className="mt-2 text-sm text-slate-600">{approval?.summary}</Dialog.Description>

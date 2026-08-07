@@ -55,6 +55,13 @@
 - 決策：setup 預設安裝隔離的 HIP 與 Vulkan binaries；啟動採 HIP 優先，僅在 `auto` 模式 readiness 失敗時改用 Vulkan。GGUF 模型由兩個後端共用。
 - 後果：manifest、啟動、診斷與 smoke evidence 必須記錄實際 backend；不得再把 NVIDIA CUDA 列為預設需求。
 
+## ADR-008：完整工作台 UI 與 planned placeholders
+
+- 狀態：Accepted
+- 背景：原始聊天頁能完成 MVP 流程，但缺少長時間使用所需的導覽、能力入口與清楚的執行狀態；新版概念稿同時包含尚未規劃的歷史、帳號、附件與模型設定。
+- 決策：完整採用概念稿的工作台資訊架構與視覺語言。已實作能力接入正式流程；尚未實作能力保留入口並明確標示「待補」或 disabled，不建立假資料。
+- 後果：視覺結構可以先穩定，但任何 planned 入口轉為可操作前，仍須補齊產品契約、實作、測試與必要的隱私／安全決策；模型入口不得暗示 hot swap。
+
 ## 待決策清單
 
 | ID | 問題 | 阻擋階段 |

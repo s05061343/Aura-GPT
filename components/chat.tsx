@@ -60,6 +60,8 @@ export function Chat() {
   const [isMobile, setIsMobile] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const scrollAnchor = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const wasBusyRef = useRef(false);
   const {
     messages,
     status,
@@ -94,6 +96,11 @@ export function Chat() {
   useEffect(() => {
     scrollAnchor.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, approval]);
+  useEffect(() => {
+    const responseFinished = wasBusyRef.current && !busy;
+    wasBusyRef.current = busy;
+    if (responseFinished && !approval) composerRef.current?.focus();
+  }, [busy, approval]);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -242,6 +249,7 @@ export function Chat() {
         <div className="composer-wrap">
           <form onSubmit={submit} className="composer">
             <textarea
+              ref={composerRef}
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={(event) => {

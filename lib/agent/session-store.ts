@@ -12,6 +12,7 @@ export type PendingApproval = {
 export type AgentSession = {
   checkpointer: MemorySaver;
   approvedTools: Set<string>;
+  deliveredToolCallIds: Set<string>;
   pending?: PendingApproval;
   lastActiveAt: number;
 };
@@ -23,12 +24,16 @@ class AgentSessionStore {
     this.sweep();
     const current = this.sessions.get(threadId);
     if (current) {
+      // Development hot reload can preserve sessions created by an older
+      // module shape. Migrate additive fields before the runtime uses them.
+      if (!current.deliveredToolCallIds) current.deliveredToolCallIds = new Set();
       current.lastActiveAt = Date.now();
       return current;
     }
     const created: AgentSession = {
       checkpointer: new MemorySaver(),
       approvedTools: new Set(),
+      deliveredToolCallIds: new Set(),
       lastActiveAt: Date.now(),
     };
     this.sessions.set(threadId, created);

@@ -5,6 +5,7 @@ const boolString = z.enum(["true", "false"]).transform((value) => value === "tru
 const envSchema = z.object({
   LLAMA_SERVER_URL: z.string().url().default("http://127.0.0.1:8080/v1"),
   LLM_MODEL_ALIAS: z.string().min(1).default("aura-local"),
+  LLM_MODEL_DISPLAY_NAME: z.string().min(1).default("Qwen3 8B"),
   AGENT_MAX_STEPS: z.coerce.number().int().min(1).max(8).default(5),
   AGENT_MAX_TOOL_CALLS: z.coerce.number().int().min(1).max(8).default(4),
   TOOL_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(15_000),

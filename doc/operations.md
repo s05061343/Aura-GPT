@@ -27,6 +27,7 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 | `LLM_GPU_LAYERS` | 否 | GPU offload | 不假設固定值，依硬體 profile |
 | `LLAMA_SERVER_URL` | 否 | Chat API 連線位置 | `http://127.0.0.1:8080/v1` |
 | `LLM_MODEL_ALIAS` | 否 | API 使用的穩定名稱 | `aura-local` |
+| `LLM_MODEL_DISPLAY_NAME` | 否 | UI 顯示的模型名稱 | `Qwen3 8B` |
 | `AGENT_MAX_STEPS` | 否 | 單輪模型步數 | `5`，並設程式硬上限 |
 | `TOOL_TIMEOUT_MS` | 否 | 一般工具 timeout | `15000` |
 | `LOG_LEVEL` | 否 | log 詳細程度 | `info` |

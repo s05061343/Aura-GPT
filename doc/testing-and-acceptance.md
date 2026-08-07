@@ -18,6 +18,8 @@
 - 串流開始前與開始後的錯誤行為。
 - 工具 timeout、無效 JSON、未知工具、過大輸出及取消。
 - LangChain model adapter 對 llama-server 已驗證 API 子集的契約測試。
+- 驗證 ToolMessage 原始 JSON 不會轉成 `text-delta`，且跨輪累積訊息中的既有 `callId` 不會再次產生 UI card。
+- 開發熱重載保留舊 session shape 時，新增的去重狀態必須惰性初始化，不得讓既有 thread 因缺少欄位而失敗。
 
 ### End-to-end
 

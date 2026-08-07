@@ -35,7 +35,7 @@ import { Button } from "@/components/ui/button";
 
 type AuraDataParts = { approval: ApprovalRequest; uiBlock: UIBlock };
 type AuraMessage = UIMessage<unknown, AuraDataParts>;
-type Status = { application: string; model: string; modelAlias: string; langSmith: string };
+type Status = { application: string; model: string; modelAlias: string; modelDisplayName: string; langSmith: string };
 
 const starters = [
   { icon: CloudSun, title: "查詢台北天氣", description: "用工具取得即時天氣與簡短建議", prompt: "幫我查台北今天的天氣" },
@@ -176,7 +176,7 @@ export function Chat() {
             <button className="icon-control mobile-menu" onClick={() => setMobileSidebarOpen(true)} aria-label="開啟側邊欄"><Menu /></button>
             <div className="title-stack"><strong>{lastPrompt ? "目前對話" : "New conversation"}</strong><small>目前分頁</small></div>
             <span className={`model-chip ${modelReady ? "is-ready" : "is-offline"}`}>
-              <span className="status-dot" />{statusInfo?.modelAlias || "Qwen3 8B"} · {modelReady ? "Local" : "Offline"}
+              <span className="status-dot" />{statusInfo?.modelDisplayName || "Qwen3 8B"} · {modelReady ? "Local" : "Offline"}
             </span>
           </div>
           <div className="topbar-actions">
@@ -263,7 +263,7 @@ export function Chat() {
                   <button type="button" className="composer-mini" aria-expanded={toolsOpen} onClick={() => setToolsOpen((value) => !value)}><Wrench />Tools<ChevronDown /></button>
                   {toolsOpen && <div className="tools-popover"><strong>可用工具</strong><span><CloudSun />天氣查詢</span><span><Landmark />臺股收盤價</span><small>首次使用每個外部工具前會要求授權。</small></div>}
                 </div>
-                <button type="button" className="composer-mini model-selector" disabled title="模型設定介面待補；目前需重新啟動服務"><Sparkles />{statusInfo?.modelAlias || "Qwen3 8B"}<PlannedBadge /></button>
+                <button type="button" className="composer-mini model-selector" disabled title="模型設定介面待補；目前需重新啟動服務"><Sparkles />{statusInfo?.modelDisplayName || "Qwen3 8B"}<PlannedBadge /></button>
               </div>
               <div className="composer-submit">
                 {lastPrompt && !busy && !approval && <button type="button" className="restore-prompt" onClick={() => setInput(lastPrompt)} title="取回上一個問題"><RotateCcw /></button>}

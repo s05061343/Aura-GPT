@@ -7,12 +7,12 @@ import {
   modelCallLimitMiddleware,
   toolCallLimitMiddleware,
 } from "langchain";
-import type { AuraEvent, ChatCommand, UIBlock } from "@/lib/contracts";
-import { uiBlockSchema } from "@/lib/contracts";
+import type { AuraEvent, ChatCommand } from "@/lib/contracts";
 import { getConfig } from "@/lib/config";
 import { SYSTEM_PROMPT } from "@/lib/agent/prompt";
 import { sessionStore, type AgentSession } from "@/lib/agent/session-store";
 import { createTools, externalToolNames } from "@/lib/tools/registry";
+import { assistantStreamText, findNewToolResults } from "@/lib/agent/stream-utils";
 
 type Writer = (event: AuraEvent) => void;
 
@@ -50,15 +50,6 @@ function buildAgent(session: AgentSession, signal: AbortSignal) {
   });
 }
 
-function contentText(content: unknown): string {
-  if (typeof content === "string") return content;
-  if (!Array.isArray(content)) return "";
-  return content.map((part) => {
-    if (part && typeof part === "object" && "text" in part && typeof part.text === "string") return part.text;
-    return "";
-  }).join("");
-}
-
 function readInterrupt(update: unknown): { tool: string; arguments: Record<string, unknown>; callId: string } | undefined {
   if (!update || typeof update !== "object") return undefined;
   const interrupts = (update as Record<string, unknown>).__interrupt__;
@@ -73,32 +64,6 @@ function readInterrupt(update: unknown): { tool: string; arguments: Record<strin
   return { tool, arguments: args, callId: String(action.id ?? randomUUID()) };
 }
 
-function findToolResult(update: unknown): { callId: string; tool: string; ui?: UIBlock } | undefined {
-  if (!update || typeof update !== "object") return undefined;
-  const nodes = Object.values(update as Record<string, unknown>);
-  for (const node of nodes) {
-    if (!node || typeof node !== "object") continue;
-    const messages = (node as Record<string, unknown>).messages;
-    if (!Array.isArray(messages)) continue;
-    for (const message of messages.toReversed()) {
-      if (!message || typeof message !== "object") continue;
-      const record = message as Record<string, unknown>;
-      const type = typeof record._getType === "function" ? String((record._getType as () => unknown)()) : String(record.type ?? "");
-      if (type !== "tool") continue;
-      const tool = String(record.name ?? "tool");
-      const callId = String(record.tool_call_id ?? record.toolCallId ?? randomUUID());
-      let payload: unknown = record.content;
-      if (typeof payload === "string") {
-        try { payload = JSON.parse(payload); } catch { /* plain tool output */ }
-      }
-      const candidate = payload && typeof payload === "object" && "ui" in payload ? (payload as { ui?: unknown }).ui : undefined;
-      const parsed = candidate ? uiBlockSchema.safeParse(candidate) : undefined;
-      return { callId, tool, ui: parsed?.success ? parsed.data : undefined };
-    }
-  }
-  return undefined;
-}
-
 async function consumeAgentStream(
   stream: AsyncIterable<unknown>,
   session: AgentSession,
@@ -106,12 +71,12 @@ async function consumeAgentStream(
   messageId: string,
   write: Writer,
 ): Promise<"stop" | "approval-required"> {
+  session.deliveredToolCallIds ??= new Set();
   for await (const item of stream) {
     if (!Array.isArray(item) || item.length < 2) continue;
     const [mode, chunk] = item as [string, unknown];
     if (mode === "messages" && Array.isArray(chunk)) {
-      const token = chunk[0] as { content?: unknown } | undefined;
-      const delta = contentText(token?.content);
+      const delta = assistantStreamText(chunk[0]);
       if (delta) write({ type: "text-delta", messageId, delta });
     }
     if (mode === "updates") {
@@ -129,8 +94,9 @@ async function consumeAgentStream(
         });
         return "approval-required";
       }
-      const result = findToolResult(chunk);
-      if (result) write({ type: "tool-result", ...result });
+      for (const result of findNewToolResults(chunk, session.deliveredToolCallIds)) {
+        write({ type: "tool-result", ...result });
+      }
     }
   }
   return "stop";

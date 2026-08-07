@@ -14,6 +14,7 @@ export async function GET(): Promise<Response> {
     application: "ready",
     model: modelReady ? "ready" : "unavailable",
     modelAlias: config.LLM_MODEL_ALIAS,
+    modelDisplayName: config.LLM_MODEL_DISPLAY_NAME,
     langSmith: config.langSmithEnabled ? "enabled" : "local-fallback",
   });
 }

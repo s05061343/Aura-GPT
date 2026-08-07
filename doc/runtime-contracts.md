@@ -24,6 +24,8 @@ type ChatCommand =
 
 LangChain callback/event stream 先轉為 NDJSON `AuraEvent`，再由自訂 AI SDK `ChatTransport` 轉為 `UIMessageChunk`；UI 不依賴 LangChain 內部事件形狀：
 
+`messages` stream 只允許 AI message chunk 轉成 `text-delta`；HumanMessage、ToolMessage 與其他內部訊息不得成為使用者可見文字。工具原始 JSON 只供 Agent 回填與伺服器端 UI mapping 使用。
+
 ```ts
 type AuraStreamEvent =
   | { type: "message-start"; messageId: string }
@@ -46,6 +48,7 @@ Agent loop 由 LangChain runtime 唯一負責。Next.js route 只做傳輸、驗
 - 同一輪平行工具呼叫只允許明確標示為唯讀、彼此獨立的工具。
 - 工具結果必須限制序列化大小；超限時截斷或摘要，並標記不完整。
 - 收到 AbortSignal 後，不得啟動新工具，現有模型與工具請求應盡力取消。
+- 每個 thread 記錄已交付 UI 的 tool `callId`；累積 checkpoint 再次出現相同 ToolMessage 時不得重複發出 `tool-result`，新結果仍須依各自 `callId` 交付。
 
 ## LangChain 邊界
 

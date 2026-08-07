@@ -1,12 +1,12 @@
 import type { ChatTransport, UIMessage, UIMessageChunk } from "ai";
-import { auraEventSchema } from "@/lib/contracts";
+import { junyxEventSchema } from "@/lib/contracts";
 
-export type AuraTransportBody = { command: Record<string, unknown> };
+export type JunyxTransportBody = { command: Record<string, unknown> };
 
-export class AuraChatTransport implements ChatTransport<UIMessage> {
+export class JunyxChatTransport implements ChatTransport<UIMessage> {
   async sendMessages(options: Parameters<ChatTransport<UIMessage>["sendMessages"]>[0]): Promise<ReadableStream<UIMessageChunk>> {
-    const command = (options.body as AuraTransportBody | undefined)?.command;
-    if (!command) throw new Error("缺少 Aura chat command");
+    const command = (options.body as JunyxTransportBody | undefined)?.command;
+    if (!command) throw new Error("缺少 JUNYX chat command");
     const response = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(options.headers as Record<string, string> | undefined) },
@@ -33,7 +33,7 @@ export class AuraChatTransport implements ChatTransport<UIMessage> {
             buffer = lines.pop() ?? "";
             for (const line of lines) {
               if (!line.trim()) continue;
-              const parsed = auraEventSchema.safeParse(JSON.parse(line));
+              const parsed = junyxEventSchema.safeParse(JSON.parse(line));
               if (!parsed.success) continue;
               const event = parsed.data;
               if (event.type === "message-start") {

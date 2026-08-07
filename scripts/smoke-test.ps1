@@ -2,8 +2,8 @@
 Read-DotEnv
 $baseUrl = if ($env:LLAMA_SERVER_URL) { $env:LLAMA_SERVER_URL.TrimEnd('/') } else { 'http://127.0.0.1:8080/v1' }
 $body = @{
-    model = 'aura-local'
-    messages = @(@{ role = 'user'; content = 'Reply with exactly: Aura smoke test passed' })
+    model = 'junyx-local'
+    messages = @(@{ role = 'user'; content = 'Reply with exactly: JUNYX smoke test passed' })
     max_tokens = 32
     stream = $false
 } | ConvertTo-Json -Depth 8
@@ -11,7 +11,7 @@ $response = Invoke-RestMethod -Uri "$baseUrl/chat/completions" -Method Post -Con
 if (-not $response.choices[0].message.content) { throw 'Text smoke test failed.' }
 
 $toolBody = @{
-    model = 'aura-local'
+    model = 'junyx-local'
     messages = @(@{ role = 'user'; content = 'Check the current weather in Taipei' })
     tools = @(@{ type = 'function'; function = @{ name = 'get_weather'; description = 'Get current weather'; parameters = @{ type = 'object'; properties = @{ location = @{ type = 'string' } }; required = @('location'); additionalProperties = $false } } })
     tool_choice = 'auto'

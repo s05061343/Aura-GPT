@@ -1,6 +1,6 @@
 . (Join-Path $PSScriptRoot 'common.ps1')
-$root = Get-AuraRoot
-$pidDir = Assert-WithinAuraRoot (Join-Path $root '.runtime\pids')
+$root = Get-JunyxRoot
+$pidDir = Assert-WithinJunyxRoot (Join-Path $root '.runtime\pids')
 foreach ($name in @('web', 'web-launcher', 'llama')) {
     $pidPath = Join-Path $pidDir "$name.pid"
     if (-not (Test-Path -LiteralPath $pidPath)) { continue }
@@ -24,5 +24,5 @@ foreach ($name in @('web', 'web-launcher', 'llama')) {
     }
     Remove-Item -LiteralPath $pidPath
 }
-$activeBackendPath = Assert-WithinAuraRoot (Join-Path $root '.runtime\active-backend.txt')
+$activeBackendPath = Assert-WithinJunyxRoot (Join-Path $root '.runtime\active-backend.txt')
 if (Test-Path -LiteralPath $activeBackendPath) { Remove-Item -LiteralPath $activeBackendPath }

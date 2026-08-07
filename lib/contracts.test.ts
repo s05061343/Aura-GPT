@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auraEventSchema, chatCommandSchema, uiBlockSchema } from "@/lib/contracts";
+import { junyxEventSchema, chatCommandSchema, uiBlockSchema } from "@/lib/contracts";
 
 describe("chatCommandSchema", () => {
   it("接受純文字 message command", () => {
@@ -40,6 +40,6 @@ describe("UI 與串流契約", () => {
   });
 
   it("驗證 approval event", () => {
-    expect(auraEventSchema.safeParse({ type: "tool-awaiting-approval", approvalId: "a", callId: "c", tool: "get_weather", summary: "approve", arguments: { location: "台北" } }).success).toBe(true);
+    expect(junyxEventSchema.safeParse({ type: "tool-awaiting-approval", approvalId: "a", callId: "c", tool: "get_weather", summary: "approve", arguments: { location: "台北" } }).success).toBe(true);
   });
 });

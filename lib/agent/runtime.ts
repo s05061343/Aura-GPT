@@ -7,14 +7,14 @@ import {
   modelCallLimitMiddleware,
   toolCallLimitMiddleware,
 } from "langchain";
-import type { AuraEvent, ChatCommand } from "@/lib/contracts";
+import type { JunyxEvent, ChatCommand } from "@/lib/contracts";
 import { getConfig } from "@/lib/config";
 import { SYSTEM_PROMPT } from "@/lib/agent/prompt";
 import { sessionStore, type AgentSession } from "@/lib/agent/session-store";
 import { createTools, externalToolNames } from "@/lib/tools/registry";
 import { assistantStreamText, findNewToolResults } from "@/lib/agent/stream-utils";
 
-type Writer = (event: AuraEvent) => void;
+type Writer = (event: JunyxEvent) => void;
 
 function createModel() {
   const config = getConfig();
@@ -37,7 +37,7 @@ function buildAgent(session: AgentSession, signal: AbortSignal) {
     externalToolNames.map((name) => [name, session.approvedTools.has(name) ? false : { allowedDecisions: ["approve", "reject"] as Array<"approve" | "reject"> }]),
   );
   return createAgent({
-    name: "aura_local_agent",
+    name: "junyx_local_agent",
     model: createModel(),
     tools: createTools(signal),
     systemPrompt: SYSTEM_PROMPT,
@@ -102,11 +102,11 @@ async function consumeAgentStream(
   return "stop";
 }
 
-export interface AuraAgentRuntime {
+export interface JunyxAgentRuntime {
   run(command: ChatCommand, signal: AbortSignal, write: Writer): Promise<void>;
 }
 
-export const auraAgentRuntime: AuraAgentRuntime = {
+export const junyxAgentRuntime: JunyxAgentRuntime = {
   async run(command, signal, write) {
     const session = sessionStore.get(command.threadId);
     const messageId = randomUUID();

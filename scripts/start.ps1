@@ -1,13 +1,13 @@
 . (Join-Path $PSScriptRoot 'common.ps1')
 Read-DotEnv
-$root = Get-AuraRoot
-$runtimeDir = Assert-WithinAuraRoot (Join-Path $root '.runtime')
-$pidDir = Assert-WithinAuraRoot (Join-Path $runtimeDir 'pids')
-$logDir = Assert-WithinAuraRoot (Join-Path $root 'logs')
+$root = Get-JunyxRoot
+$runtimeDir = Assert-WithinJunyxRoot (Join-Path $root '.runtime')
+$pidDir = Assert-WithinJunyxRoot (Join-Path $runtimeDir 'pids')
+$logDir = Assert-WithinJunyxRoot (Join-Path $root 'logs')
 New-Item -ItemType Directory -Force -Path $pidDir, $logDir | Out-Null
 
 # A development UI may still be listening after llama-server exits. Reuse it
-# only when it identifies itself as Aura-GPT; fail before loading the model when
+# only when it identifies itself as JUNYX; fail before loading the model when
 # another application owns port 3000.
 $existingWebListener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue |
     Select-Object -First 1
@@ -19,12 +19,12 @@ if ($existingWebListener) {
     }
     catch { }
     if (-not $reuseExistingWeb) {
-        throw "Port 3000 is already in use by PID $($existingWebListener.OwningProcess), and it is not a healthy Aura-GPT UI."
+        throw "Port 3000 is already in use by PID $($existingWebListener.OwningProcess), and it is not a healthy JUNYX UI."
     }
 }
 
 $manifest = Get-Content -Raw -LiteralPath (Join-Path $root 'runtime-manifest.json') | ConvertFrom-Json
-$runtimeRoot = Assert-WithinAuraRoot (Join-Path $runtimeDir 'llama.cpp')
+$runtimeRoot = Assert-WithinJunyxRoot (Join-Path $runtimeDir 'llama.cpp')
 $requestedBackend = if ($env:LLM_BACKEND) { $env:LLM_BACKEND.ToLowerInvariant() } else { 'auto' }
 if ($requestedBackend -notin @('auto', 'hip', 'vulkan')) { throw 'LLM_BACKEND must be auto, hip, or vulkan.' }
 $backendCandidates = if ($requestedBackend -eq 'auto') {
@@ -32,7 +32,7 @@ $backendCandidates = if ($requestedBackend -eq 'auto') {
 } else {
     @($requestedBackend)
 }
-$modelPath = if ($env:LLM_MODEL_PATH) { Assert-WithinAuraRoot (Join-Path $root $env:LLM_MODEL_PATH) } else { Assert-WithinAuraRoot (Join-Path $root 'models\Qwen3-8B-Q4_K_M.gguf') }
+$modelPath = if ($env:LLM_MODEL_PATH) { Assert-WithinJunyxRoot (Join-Path $root $env:LLM_MODEL_PATH) } else { Assert-WithinJunyxRoot (Join-Path $root 'models\Qwen3-8B-Q4_K_M.gguf') }
 if (-not (Test-Path -LiteralPath $modelPath -PathType Leaf)) { throw "Model file not found: $modelPath" }
 $hostName = if ($env:LLM_SERVER_HOST) { $env:LLM_SERVER_HOST } else { '127.0.0.1' }
 if ($hostName -notin @('127.0.0.1', 'localhost')) { throw 'MVP only permits llama-server on loopback.' }
@@ -44,7 +44,7 @@ $gpuLayers = if ($env:LLM_GPU_LAYERS) { [int]$env:LLM_GPU_LAYERS } else { 99 }
 # command line. Quote the model path explicitly so workspace paths containing
 # spaces remain a single llama-server argument.
 $quotedModelPath = '"' + $modelPath + '"'
-$llamaArgs = @('-m', $quotedModelPath, '--host', $hostName, '--port', "$port", '-c', "$context", '--n-gpu-layers', "$gpuLayers", '--alias', 'aura-local', '--jinja', '-np', '1')
+$llamaArgs = @('-m', $quotedModelPath, '--host', $hostName, '--port', "$port", '-c', "$context", '--n-gpu-layers', "$gpuLayers", '--alias', 'junyx-local', '--jinja', '-np', '1')
 $llama = $null
 $activeBackend = $null
 foreach ($backendName in $backendCandidates) {
@@ -92,7 +92,7 @@ Set-Content -LiteralPath (Join-Path $runtimeDir 'active-backend.txt') -Value $ac
 $corepackCommand = Get-Command 'corepack' -ErrorAction Stop
 if ($reuseExistingWeb) {
     Set-Content -LiteralPath (Join-Path $pidDir 'web.pid') -Value $existingWebListener.OwningProcess
-    Write-Host "Aura-GPT recovered with $activeBackend backend: http://127.0.0.1:3000"
+    Write-Host "JUNYX recovered with $activeBackend backend: http://127.0.0.1:3000"
     return
 }
 $web = Start-Process -FilePath $corepackCommand.Source -ArgumentList @('pnpm', 'dev') -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logDir 'web.out.log') -RedirectStandardError (Join-Path $logDir 'web.err.log')
@@ -101,4 +101,4 @@ Wait-HttpReady -Url 'http://127.0.0.1:3000/api/status' -TimeoutSeconds 120
 $webListener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction Stop |
     Select-Object -First 1
 Set-Content -LiteralPath (Join-Path $pidDir 'web.pid') -Value $webListener.OwningProcess
-Write-Host "Aura-GPT started with $activeBackend backend: http://127.0.0.1:3000"
+Write-Host "JUNYX started with $activeBackend backend: http://127.0.0.1:3000"

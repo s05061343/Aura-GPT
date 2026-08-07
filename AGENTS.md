@@ -1,4 +1,4 @@
-# Aura-GPT Agent Guide
+# JUNYX Agent Guide
 
 本檔是 Agent 的專案入口，不承載完整設計內容。開始工作前，依任務範圍讀取 `doc/README.md` 及其索引文件；不要依賴對話記憶取代專案文件。
 

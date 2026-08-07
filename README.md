@@ -1,6 +1,6 @@
-# Aura-GPT
+# JUNYX
 
-Aura-GPT 是以 LangChain.js 為核心、透過 llama.cpp 執行本機 Qwen3 GGUF 模型的單機 AI Agent。MVP 支援串流對話、天氣查詢、臺灣上市／上櫃最新官方收盤價、工具首次授權，以及白名單 Generative UI。
+JUNYX 是以 LangChain.js 為核心、透過 llama.cpp 執行本機 Qwen3 GGUF 模型的單機 AI Agent。MVP 支援串流對話、天氣查詢、臺灣上市／上櫃最新官方收盤價、工具首次授權，以及白名單 Generative UI。
 
 ## 目前技術組成
 

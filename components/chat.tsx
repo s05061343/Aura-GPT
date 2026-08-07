@@ -28,13 +28,13 @@ import {
   X,
 } from "lucide-react";
 import { uiBlockSchema, type UIBlock } from "@/lib/contracts";
-import { AuraChatTransport } from "@/lib/aura-chat-transport";
+import { JunyxChatTransport } from "@/lib/junyx-chat-transport";
 import { ApprovalDialog, type ApprovalRequest } from "@/components/approval-dialog";
 import { UIBlockView } from "@/components/cards";
 import { Button } from "@/components/ui/button";
 
-type AuraDataParts = { approval: ApprovalRequest; uiBlock: UIBlock };
-type AuraMessage = UIMessage<unknown, AuraDataParts>;
+type JunyxDataParts = { approval: ApprovalRequest; uiBlock: UIBlock };
+type JunyxMessage = UIMessage<unknown, JunyxDataParts>;
 type Status = { application: string; model: string; modelAlias: string; modelDisplayName: string; langSmith: string };
 
 const starters = [
@@ -49,7 +49,7 @@ function PlannedBadge() {
 }
 
 export function Chat() {
-  const transport = useMemo(() => new AuraChatTransport(), []);
+  const transport = useMemo(() => new JunyxChatTransport(), []);
   const [threadId] = useState(() => crypto.randomUUID());
   const [lastPrompt, setLastPrompt] = useState("");
   const [input, setInput] = useState("");
@@ -71,7 +71,7 @@ export function Chat() {
     stop,
     setMessages,
     clearError,
-  } = useChat<AuraMessage>({
+  } = useChat<JunyxMessage>({
     id: threadId,
     transport,
     onData(part) {
@@ -135,13 +135,13 @@ export function Chat() {
   }
 
   return (
-    <main className="aura-app" data-sidebar-collapsed={sidebarCollapsed || undefined}>
+    <main className="junyx-app" data-sidebar-collapsed={sidebarCollapsed || undefined}>
       {mobileSidebarOpen && <button className="sidebar-scrim" aria-label="關閉側邊欄" onClick={() => setMobileSidebarOpen(false)} />}
-      <aside className={`aura-sidebar ${mobileSidebarOpen ? "is-open" : ""}`} aria-label="主要導覽" inert={isMobile && !mobileSidebarOpen ? true : undefined}>
+      <aside className={`junyx-sidebar ${mobileSidebarOpen ? "is-open" : ""}`} aria-label="主要導覽" inert={isMobile && !mobileSidebarOpen ? true : undefined}>
         <div className="sidebar-brand-row">
           <div className="brand-lockup">
             <span className="brand-mark"><Sparkles aria-hidden="true" /></span>
-            <span className="brand-copy"><strong>Aura-GPT</strong><small>Local AI Agent</small></span>
+            <span className="brand-copy"><strong>JUNYX</strong><small>Local AI Agent</small></span>
           </div>
           <button className="icon-control desktop-collapse" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? "展開側邊欄" : "收合側邊欄"}>
             {sidebarCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
@@ -177,8 +177,8 @@ export function Chat() {
         </div>
       </aside>
 
-      <section className="aura-main">
-        <header className="aura-topbar">
+      <section className="junyx-main">
+        <header className="junyx-topbar">
           <div className="topbar-left">
             <button className="icon-control mobile-menu" onClick={() => setMobileSidebarOpen(true)} aria-label="開啟側邊欄"><Menu /></button>
             <div className="title-stack"><strong>{lastPrompt ? "目前對話" : "New conversation"}</strong><small>目前分頁</small></div>
@@ -205,7 +205,7 @@ export function Chat() {
             <section className="empty-state">
               <div className="empty-state-inner">
                 <span className="empty-orb"><Sparkles /></span>
-                <h1>今天想和 Aura 一起做什麼？</h1>
+                <h1>今天想和 JUNYX 一起做什麼？</h1>
                 <p>使用本機 Qwen Agent 對話，或透過受控工具取得天氣與臺股最新官方收盤價。</p>
                 <div className="starter-grid">
                   {starters.map((starter) => {
@@ -234,7 +234,7 @@ export function Chat() {
                   <article key={message.id} className={`message-row ${message.role}`}>
                     {message.role === "assistant" && <span className="assistant-mark"><Sparkles /></span>}
                     <div className={message.role === "user" ? "user-bubble" : "assistant-body"}>
-                      {text ? <div className="markdown"><ReactMarkdown rehypePlugins={[rehypeSanitize]}>{text}</ReactMarkdown></div> : busy && message.role === "assistant" ? <span className="typing-indicator" aria-label="Aura 正在回覆"><i /><i /><i /></span> : null}
+                      {text ? <div className="markdown"><ReactMarkdown rehypePlugins={[rehypeSanitize]}>{text}</ReactMarkdown></div> : busy && message.role === "assistant" ? <span className="typing-indicator" aria-label="JUNYX 正在回覆"><i /><i /><i /></span> : null}
                       {blocks.map((block, index) => <UIBlockView key={`${block.type}-${index}`} block={block} />)}
                     </div>
                   </article>
@@ -260,7 +260,7 @@ export function Chat() {
               }}
               rows={1}
               maxLength={16000}
-              placeholder="Ask Aura anything..."
+              placeholder="Ask JUNYX anything..."
               disabled={busy || Boolean(approval)}
               aria-label="聊天訊息"
             />
@@ -279,7 +279,7 @@ export function Chat() {
               </div>
             </div>
           </form>
-          <p className="composer-note">Aura 可能會犯錯；外部工具執行前會揭露傳送資料並要求授權。</p>
+          <p className="composer-note">JUNYX 可能會犯錯；外部工具執行前會揭露傳送資料並要求授權。</p>
         </div>
       </section>
       <ApprovalDialog approval={approval} busy={busy} onDecision={decide} />

@@ -35,8 +35,8 @@ button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-.aura-app { min-height: 100dvh; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); overflow: hidden; }
-.aura-sidebar { height: 100dvh; min-width: 0; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--line); background: rgb(14 17 24 / 94%); backdrop-filter: blur(18px); transition: width .24s ease; z-index: 40; }
+.junyx-app { min-height: 100dvh; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); overflow: hidden; }
+.junyx-sidebar { height: 100dvh; min-width: 0; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--line); background: rgb(14 17 24 / 94%); backdrop-filter: blur(18px); transition: width .24s ease; z-index: 40; }
 .sidebar-brand-row { height: 72px; display: flex; align-items: center; gap: 10px; padding: 16px; }
 .brand-lockup { min-width: 0; flex: 1; display: flex; align-items: center; gap: 11px; }
 .brand-mark { width: 40px; height: 40px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 13px; color: white; background: linear-gradient(145deg, var(--accent), var(--accent-secondary)); box-shadow: 0 10px 28px rgb(94 215 231 / 18%); }
@@ -78,8 +78,8 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent);
 .planned-settings { display: flex; align-items: center; gap: 7px; padding: 5px 10px 2px; color: #8994a3; font-size: 10px; }
 .planned-settings svg { width: 12px; }
 
-.aura-main { min-width: 0; height: 100dvh; position: relative; display: flex; flex-direction: column; overflow: hidden; }
-.aura-topbar { height: 68px; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 0 28px; border-bottom: 1px solid rgb(37 44 56 / 90%); background: rgb(9 11 16 / 78%); backdrop-filter: blur(16px); z-index: 10; }
+.junyx-main { min-width: 0; height: 100dvh; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.junyx-topbar { height: 68px; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 0 28px; border-bottom: 1px solid rgb(37 44 56 / 90%); background: rgb(9 11 16 / 78%); backdrop-filter: blur(16px); z-index: 10; }
 .topbar-left, .topbar-actions { min-width: 0; display: flex; align-items: center; gap: 12px; }
 .title-stack { min-width: 0; display: flex; flex-direction: column; }
 .title-stack strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 750; }
@@ -154,33 +154,33 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent);
 .markdown code { padding: .1rem .3rem; border: 1px solid #303846; border-radius: .35rem; background: #151b24; }
 .markdown pre { overflow: auto; padding: 1rem; border: 1px solid #303846; border-radius: .75rem; color: #f8fafc; background: #10141c; }
 
-.aura-app[data-sidebar-collapsed] { grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr); }
-.aura-app[data-sidebar-collapsed] .brand-copy,
-.aura-app[data-sidebar-collapsed] .new-chat-button span,
-.aura-app[data-sidebar-collapsed] .sidebar-link span,
-.aura-app[data-sidebar-collapsed] .sidebar-link .planned-badge,
-.aura-app[data-sidebar-collapsed] .sidebar-section-label,
-.aura-app[data-sidebar-collapsed] .conversation-title,
-.aura-app[data-sidebar-collapsed] .row-menu,
-.aura-app[data-sidebar-collapsed] .history-placeholder,
-.aura-app[data-sidebar-collapsed] .runtime-copy,
-.aura-app[data-sidebar-collapsed] .runtime-chevron,
-.aura-app[data-sidebar-collapsed] .planned-settings { display: none; }
-.aura-app[data-sidebar-collapsed] .sidebar-brand-row { padding-inline: 10px; justify-content: center; }
-.aura-app[data-sidebar-collapsed] .brand-lockup { flex: 0 0 auto; }
-.aura-app[data-sidebar-collapsed] .desktop-collapse { position: absolute; top: 18px; left: 73px; border: 1px solid var(--line); background: #121820; box-shadow: 0 8px 24px rgb(0 0 0 / 28%); }
-.aura-app[data-sidebar-collapsed] .sidebar-actions, .aura-app[data-sidebar-collapsed] .conversation-nav { padding-inline: 10px; }
-.aura-app[data-sidebar-collapsed] .new-chat-button, .aura-app[data-sidebar-collapsed] .sidebar-link, .aura-app[data-sidebar-collapsed] .conversation-row, .aura-app[data-sidebar-collapsed] .runtime-account-button { justify-content: center; padding-inline: 0; }
-.aura-app[data-sidebar-collapsed] .conversation-dot { width: 9px; height: 9px; }
+.junyx-app[data-sidebar-collapsed] { grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr); }
+.junyx-app[data-sidebar-collapsed] .brand-copy,
+.junyx-app[data-sidebar-collapsed] .new-chat-button span,
+.junyx-app[data-sidebar-collapsed] .sidebar-link span,
+.junyx-app[data-sidebar-collapsed] .sidebar-link .planned-badge,
+.junyx-app[data-sidebar-collapsed] .sidebar-section-label,
+.junyx-app[data-sidebar-collapsed] .conversation-title,
+.junyx-app[data-sidebar-collapsed] .row-menu,
+.junyx-app[data-sidebar-collapsed] .history-placeholder,
+.junyx-app[data-sidebar-collapsed] .runtime-copy,
+.junyx-app[data-sidebar-collapsed] .runtime-chevron,
+.junyx-app[data-sidebar-collapsed] .planned-settings { display: none; }
+.junyx-app[data-sidebar-collapsed] .sidebar-brand-row { padding-inline: 10px; justify-content: center; }
+.junyx-app[data-sidebar-collapsed] .brand-lockup { flex: 0 0 auto; }
+.junyx-app[data-sidebar-collapsed] .desktop-collapse { position: absolute; top: 18px; left: 73px; border: 1px solid var(--line); background: #121820; box-shadow: 0 8px 24px rgb(0 0 0 / 28%); }
+.junyx-app[data-sidebar-collapsed] .sidebar-actions, .junyx-app[data-sidebar-collapsed] .conversation-nav { padding-inline: 10px; }
+.junyx-app[data-sidebar-collapsed] .new-chat-button, .junyx-app[data-sidebar-collapsed] .sidebar-link, .junyx-app[data-sidebar-collapsed] .conversation-row, .junyx-app[data-sidebar-collapsed] .runtime-account-button { justify-content: center; padding-inline: 0; }
+.junyx-app[data-sidebar-collapsed] .conversation-dot { width: 9px; height: 9px; }
 
 @media (max-width: 860px) {
-  .aura-app, .aura-app[data-sidebar-collapsed] { display: block; }
-  .aura-sidebar { position: fixed; inset: 0 auto 0 0; width: min(86vw, 300px); transform: translateX(-102%); transition: transform .22s ease; box-shadow: 20px 0 50px rgb(0 0 0 / 45%); }
-  .aura-sidebar.is-open { transform: translateX(0); }
+  .junyx-app, .junyx-app[data-sidebar-collapsed] { display: block; }
+  .junyx-sidebar { position: fixed; inset: 0 auto 0 0; width: min(86vw, 300px); transform: translateX(-102%); transition: transform .22s ease; box-shadow: 20px 0 50px rgb(0 0 0 / 45%); }
+  .junyx-sidebar.is-open { transform: translateX(0); }
   .sidebar-scrim { position: fixed; inset: 0; z-index: 35; border: 0; background: rgb(0 0 0 / 58%); backdrop-filter: blur(2px); }
   .desktop-collapse { display: none; }
   .mobile-close, .mobile-menu { display: grid; }
-  .aura-topbar { padding-inline: 16px; }
+  .junyx-topbar { padding-inline: 16px; }
   .title-stack small { display: block; }
   .trace-status span { display: none; }
   .conversation-workspace { padding-inline: 16px; padding-bottom: 250px; scroll-padding-bottom: 250px; }
@@ -188,7 +188,7 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent);
 }
 
 @media (max-width: 620px) {
-  .aura-topbar { height: 62px; gap: 8px; }
+  .junyx-topbar { height: 62px; gap: 8px; }
   .topbar-left { gap: 8px; }
   .title-stack { max-width: 110px; }
   .model-chip { max-width: 145px; overflow: hidden; text-overflow: ellipsis; }

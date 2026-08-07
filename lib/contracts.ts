@@ -79,7 +79,7 @@ export const chatCommandSchema = z.discriminatedUnion("type", [
 ]);
 export type ChatCommand = z.infer<typeof chatCommandSchema>;
 
-export const auraEventSchema = z.discriminatedUnion("type", [
+export const junyxEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("message-start"), messageId: z.string() }),
   z.object({ type: z.literal("text-delta"), messageId: z.string(), delta: z.string() }),
   z.object({
@@ -95,4 +95,4 @@ export const auraEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("message-end"), messageId: z.string(), finishReason: z.enum(["stop", "length", "error", "approval-required"]) }),
   z.object({ type: z.literal("error"), error: publicErrorSchema }),
 ]);
-export type AuraEvent = z.infer<typeof auraEventSchema>;
+export type JunyxEvent = z.infer<typeof junyxEventSchema>;

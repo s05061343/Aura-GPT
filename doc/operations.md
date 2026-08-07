@@ -13,7 +13,7 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 
 一般使用者可雙擊根目錄 `run.bat`；它呼叫 `scripts/run.ps1` 執行前置檢查，並以 `.runtime/setup-complete.json` 中的 manifest SHA-256 判斷 runtime/model 是否已完成驗證。manifest 改變或標記不存在時會重新執行 setup。`stop.bat` 僅停止由本專案 PID 檔記錄的程序。
 
-`run.ps1` 判定「已啟動」時必須同時確認 Web application 與 model readiness。若 Aura-GPT Web 程序仍在但 llama-server 已離線，啟動流程會復用既有 Web listener、重新啟動模型並重建 PID 紀錄；若 3000 埠屬於其他服務，則在載入模型前停止並回報衝突。
+`run.ps1` 判定「已啟動」時必須同時確認 Web application 與 model readiness。若 JUNYX Web 程序仍在但 llama-server 已離線，啟動流程會復用既有 Web listener、重新啟動模型並重建 PID 紀錄；若 3000 埠屬於其他服務，則在載入模型前停止並回報衝突。
 
 ## 環境變數
 
@@ -26,7 +26,7 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 | `LLM_CONTEXT_SIZE` | 否 | context window | 依已驗證模型 profile |
 | `LLM_GPU_LAYERS` | 否 | GPU offload | 不假設固定值，依硬體 profile |
 | `LLAMA_SERVER_URL` | 否 | Chat API 連線位置 | `http://127.0.0.1:8080/v1` |
-| `LLM_MODEL_ALIAS` | 否 | API 使用的穩定名稱 | `aura-local` |
+| `LLM_MODEL_ALIAS` | 否 | API 使用的穩定名稱 | `junyx-local` |
 | `LLM_MODEL_DISPLAY_NAME` | 否 | UI 顯示的模型名稱 | `Qwen3 8B` |
 | `AGENT_MAX_STEPS` | 否 | 單輪模型步數 | `5`，並設程式硬上限 |
 | `TOOL_TIMEOUT_MS` | 否 | 一般工具 timeout | `15000` |
@@ -34,7 +34,7 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 | `AGENT_MAX_TOOL_CALLS` | 否 | 單輪工具呼叫上限 | `4` |
 | `SESSION_TTL_MS` | 否 | 記憶體 thread 閒置期限 | `1800000` |
 | `LANGSMITH_TRACING` | 否 | 啟用完整 LangSmith trace | `true` |
-| `LANGSMITH_PROJECT` | 否 | LangSmith project | `aura-gpt-local` |
+| `LANGSMITH_PROJECT` | 否 | LangSmith project | `junyx-local` |
 | `LANGSMITH_API_KEY` | 否 | LangSmith 金鑰 | 未設定時降級本機 metadata log |
 
 `.env.example` 未來只放非秘密範例；`.env*` 的實際秘密版本與 `models/` 必須忽略。環境變數解析應使用可靠函式庫或 framework 機制，不使用 `export $(grep ... | xargs)`。
@@ -65,7 +65,7 @@ Windows HIP 套件的 `ggml-hip.dll` 依賴對應的 ROCm runtime。啟動腳本
 4. 執行最小文字 smoke test；宣稱支援 tools 的模型再執行工具 smoke test。
 5. 啟動 Next.js，輸出本機 URL 與 correlation-friendly log。
 
-若第 5 步的 Aura-GPT Web 程序已存在，則復用該程序並只恢復缺失的 llama-server；不得僅因 `/api/status` 回傳 HTTP 200 就忽略其中的 model readiness。
+若第 5 步的 JUNYX Web 程序已存在，則復用該程序並只恢復缺失的 llama-server；不得僅因 `/api/status` 回傳 HTTP 200 就忽略其中的 model readiness。
 
 模型切換採「停止 → 修改 profile/path → 啟動 → smoke test」。第一版不稱為 hot swap。
 

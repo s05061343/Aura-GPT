@@ -14,7 +14,7 @@
 ### Integration
 
 - 以 fake LLM 驗證 text → tool call → tool result → final text 完整迴圈。
-- 驗證 LangChain event → Aura stream event 的 protocol adapter 契約，避免 LangChain 升級影響 UI。
+- 驗證 LangChain event → JUNYX stream event 的 protocol adapter 契約，避免 LangChain 升級影響 UI。
 - 串流開始前與開始後的錯誤行為。
 - 工具 timeout、無效 JSON、未知工具、過大輸出及取消。
 - LangChain model adapter 對 llama-server 已驗證 API 子集的契約測試。
@@ -30,7 +30,7 @@
 - 桌面側欄收合與行動版 drawer 可操作；drawer 關閉時其中控制項不進入鍵盤焦點順序。
 - planned 功能入口呈現一致的「待補」或 disabled 狀態，不顯示虛構歷史、帳號或模型切換結果。
 - starter prompt 只填入 composer，不繞過正常送出、工具授權與 Agent runtime 流程。
-- Web 程序存在但 llama-server 離線時，再次執行 `run.bat` 能恢復模型、重建 PID，並讓 `/api/status` 回報 model ready；非 Aura-GPT 程序占用 3000 時必須 fail closed。
+- Web 程序存在但 llama-server 離線時，再次執行 `run.bat` 能恢復模型、重建 PID，並讓 `/api/status` 回報 model ready；非 JUNYX 程序占用 3000 時必須 fail closed。
 
 ### Security
 

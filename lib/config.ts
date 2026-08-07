@@ -4,7 +4,7 @@ const boolString = z.enum(["true", "false"]).transform((value) => value === "tru
 
 const envSchema = z.object({
   LLAMA_SERVER_URL: z.string().url().default("http://127.0.0.1:8080/v1"),
-  LLM_MODEL_ALIAS: z.string().min(1).default("aura-local"),
+  LLM_MODEL_ALIAS: z.string().min(1).default("junyx-local"),
   LLM_MODEL_DISPLAY_NAME: z.string().min(1).default("Qwen3 8B"),
   AGENT_MAX_STEPS: z.coerce.number().int().min(1).max(8).default(5),
   AGENT_MAX_TOOL_CALLS: z.coerce.number().int().min(1).max(8).default(4),
@@ -12,15 +12,15 @@ const envSchema = z.object({
   SESSION_TTL_MS: z.coerce.number().int().min(60_000).max(86_400_000).default(1_800_000),
   LANGSMITH_TRACING: boolString.default(true),
   LANGSMITH_API_KEY: z.string().optional(),
-  LANGSMITH_PROJECT: z.string().default("aura-gpt-local"),
+  LANGSMITH_PROJECT: z.string().default("junyx-local"),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 });
 
-export type AuraConfig = z.infer<typeof envSchema> & { langSmithEnabled: boolean };
+export type JunyxConfig = z.infer<typeof envSchema> & { langSmithEnabled: boolean };
 
-let cached: AuraConfig | undefined;
+let cached: JunyxConfig | undefined;
 
-export function getConfig(): AuraConfig {
+export function getConfig(): JunyxConfig {
   if (cached) return cached;
   const parsed = envSchema.parse(process.env);
   const langSmithEnabled = parsed.LANGSMITH_TRACING && Boolean(parsed.LANGSMITH_API_KEY);

@@ -1,6 +1,6 @@
-# Aura-GPT 文件索引
+# JUNYX 文件索引
 
-本目錄是 Aura-GPT 的持久化專案記憶。根目錄 `AGENTS.md` 負責閱讀路由，本檔負責文件導覽與狀態，不在多處重複同一份規格。
+本目錄是 JUNYX 的持久化專案記憶。根目錄 `AGENTS.md` 負責閱讀路由，本檔負責文件導覽與狀態，不在多處重複同一份規格。
 
 ## 建議閱讀順序
 
@@ -16,7 +16,7 @@
 | 8 | [實作路線圖](implementation-roadmap.md) | 分期、依賴、交付成果與退出條件 | Draft |
 | 9 | [架構決策紀錄](decisions.md) | 已接受、暫定與待決策事項 | Living |
 
-Markdown 規格是唯一實作依據。舊版 `AuraGPT_Design_Document.html` 已移除，其有效內容已整合至本索引所列文件，以免維護兩套重複且可能漂移的規格。
+Markdown 規格是唯一實作依據。舊版 `JUNYX_Design_Document.html` 已移除，其有效內容已整合至本索引所列文件，以免維護兩套重複且可能漂移的規格。
 
 ## 狀態定義
 

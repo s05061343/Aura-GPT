@@ -52,6 +52,6 @@ class AgentSessionStore {
   }
 }
 
-const globalStore = globalThis as typeof globalThis & { __auraSessionStore?: AgentSessionStore };
-export const sessionStore = globalStore.__auraSessionStore ?? new AgentSessionStore();
-if (process.env.NODE_ENV !== "production") globalStore.__auraSessionStore = sessionStore;
+const globalStore = globalThis as typeof globalThis & { __junyxSessionStore?: AgentSessionStore };
+export const sessionStore = globalStore.__junyxSessionStore ?? new AgentSessionStore();
+if (process.env.NODE_ENV !== "production") globalStore.__junyxSessionStore = sessionStore;

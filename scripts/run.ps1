@@ -1,6 +1,6 @@
 . (Join-Path $PSScriptRoot 'common.ps1')
 
-$root = Get-AuraRoot
+$root = Get-JunyxRoot
 Set-Location -LiteralPath $root
 
 function Test-Command([string]$Name) {
@@ -51,12 +51,12 @@ try {
     try {
         $status = Invoke-RestMethod -Uri 'http://127.0.0.1:3000/api/status' -TimeoutSec 3
         if ($status.application -eq 'ready' -and $status.model -eq 'ready') {
-            Write-Host 'Aura-GPT is already running.'
+            Write-Host 'JUNYX is already running.'
             Start-Process 'http://127.0.0.1:3000'
             exit 0
         }
         if ($status.application -eq 'ready') {
-            Write-Host 'Aura-GPT UI is running, but the model is offline. Recovering llama-server...'
+            Write-Host 'JUNYX UI is running, but the model is offline. Recovering llama-server...'
         }
     }
     catch { }

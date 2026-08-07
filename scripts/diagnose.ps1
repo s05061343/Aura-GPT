@@ -1,6 +1,6 @@
 . (Join-Path $PSScriptRoot 'common.ps1')
 Read-DotEnv
-$root = Get-AuraRoot
+$root = Get-JunyxRoot
 Write-Host "Workspace: $root"
 Write-Host "Node: $(node --version 2>$null)"
 Write-Host "pnpm: $(corepack pnpm --version 2>$null)"

@@ -22,12 +22,12 @@ type ChatCommand =
 
 ## 串流事件
 
-LangChain callback/event stream 先轉為 NDJSON `AuraEvent`，再由自訂 AI SDK `ChatTransport` 轉為 `UIMessageChunk`；UI 不依賴 LangChain 內部事件形狀：
+LangChain callback/event stream 先轉為 NDJSON `JunyxEvent`，再由自訂 AI SDK `ChatTransport` 轉為 `UIMessageChunk`；UI 不依賴 LangChain 內部事件形狀：
 
 `messages` stream 只允許 AI message chunk 轉成 `text-delta`；HumanMessage、ToolMessage 與其他內部訊息不得成為使用者可見文字。工具原始 JSON 只供 Agent 回填與伺服器端 UI mapping 使用。
 
 ```ts
-type AuraStreamEvent =
+type JunyxStreamEvent =
   | { type: "message-start"; messageId: string }
   | { type: "text-delta"; messageId: string; delta: string }
   | { type: "tool-awaiting-approval"; approvalId: string; callId: string; tool: string; summary: string; arguments: object }
@@ -52,7 +52,7 @@ Agent loop 由 LangChain runtime 唯一負責。Next.js route 只做傳輸、驗
 
 ## LangChain 邊界
 
-- 對內定義 `AuraAgentRuntime` 介面，避免 route 直接耦合特定 Agent factory 或 executor 類別。
+- 對內定義 `JunyxAgentRuntime` 介面，避免 route 直接耦合特定 Agent factory 或 executor 類別。
 - LangChain message、tool call 與 callback event 僅存在於 agent/model adapter 層。
 - model adapter 必須支援逐步串流、工具 schema 綁定、AbortSignal 與結構化完成原因。
 - LangChain 版本升級若改變 event schema，應只修改 protocol adapter 與契約測試。

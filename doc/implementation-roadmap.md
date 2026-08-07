@@ -11,6 +11,7 @@
 - TWSE、TPEx、Open-Meteo 官方 API 已完成真實回應契約驗證。
 - 已將 Windows runtime 修正為 AMD RX 9070 XT 的 HIP 預設、Vulkan 備援；尚需在 Node.js 24 與目標硬體完成模型下載，並分別記錄文字與 Tool Calling smoke test，才能完成模型 profile 驗收。
 - 已將聊天 UI 升級為完整 AI 工作台 shell；現有聊天、工具與授權能力接入新版介面，延後能力以 planned/disabled 狀態保留入口。
+- 已修正 Web 程序殘留而模型離線時的啟動恢復流程；`run.bat` 現在同時檢查 application 與 model readiness，並可復用既有 Aura-GPT Web listener 恢復 llama-server。
 
 ## Phase 0：決策與環境基線
 

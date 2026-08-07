@@ -6,6 +6,23 @@ $pidDir = Assert-WithinAuraRoot (Join-Path $runtimeDir 'pids')
 $logDir = Assert-WithinAuraRoot (Join-Path $root 'logs')
 New-Item -ItemType Directory -Force -Path $pidDir, $logDir | Out-Null
 
+# A development UI may still be listening after llama-server exits. Reuse it
+# only when it identifies itself as Aura-GPT; fail before loading the model when
+# another application owns port 3000.
+$existingWebListener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+$reuseExistingWeb = $false
+if ($existingWebListener) {
+    try {
+        $existingStatus = Invoke-RestMethod -Uri 'http://127.0.0.1:3000/api/status' -TimeoutSec 3
+        $reuseExistingWeb = $existingStatus.application -eq 'ready'
+    }
+    catch { }
+    if (-not $reuseExistingWeb) {
+        throw "Port 3000 is already in use by PID $($existingWebListener.OwningProcess), and it is not a healthy Aura-GPT UI."
+    }
+}
+
 $manifest = Get-Content -Raw -LiteralPath (Join-Path $root 'runtime-manifest.json') | ConvertFrom-Json
 $runtimeRoot = Assert-WithinAuraRoot (Join-Path $runtimeDir 'llama.cpp')
 $requestedBackend = if ($env:LLM_BACKEND) { $env:LLM_BACKEND.ToLowerInvariant() } else { 'auto' }
@@ -73,9 +90,10 @@ Set-Content -LiteralPath (Join-Path $pidDir 'llama.pid') -Value $llama.Id
 Set-Content -LiteralPath (Join-Path $runtimeDir 'active-backend.txt') -Value $activeBackend
 
 $corepackCommand = Get-Command 'corepack' -ErrorAction Stop
-$existingWebListener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
-if ($existingWebListener) {
-    throw "Port 3000 is already in use by PID $($existingWebListener[0].OwningProcess)."
+if ($reuseExistingWeb) {
+    Set-Content -LiteralPath (Join-Path $pidDir 'web.pid') -Value $existingWebListener.OwningProcess
+    Write-Host "Aura-GPT recovered with $activeBackend backend: http://127.0.0.1:3000"
+    return
 }
 $web = Start-Process -FilePath $corepackCommand.Source -ArgumentList @('pnpm', 'dev') -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logDir 'web.out.log') -RedirectStandardError (Join-Path $logDir 'web.err.log')
 Set-Content -LiteralPath (Join-Path $pidDir 'web-launcher.pid') -Value $web.Id

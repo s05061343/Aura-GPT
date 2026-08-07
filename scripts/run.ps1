@@ -49,11 +49,14 @@ try {
     }
 
     try {
-        $status = Invoke-WebRequest -Uri 'http://127.0.0.1:3000/api/status' -UseBasicParsing -TimeoutSec 3
-        if ($status.StatusCode -eq 200) {
+        $status = Invoke-RestMethod -Uri 'http://127.0.0.1:3000/api/status' -TimeoutSec 3
+        if ($status.application -eq 'ready' -and $status.model -eq 'ready') {
             Write-Host 'Aura-GPT is already running.'
             Start-Process 'http://127.0.0.1:3000'
             exit 0
+        }
+        if ($status.application -eq 'ready') {
+            Write-Host 'Aura-GPT UI is running, but the model is offline. Recovering llama-server...'
         }
     }
     catch { }

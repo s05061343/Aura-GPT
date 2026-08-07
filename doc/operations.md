@@ -13,6 +13,8 @@ MVP 僅支援 PowerShell，不提供 Bash 或 Docker。`scripts/` 包含 runtime
 
 一般使用者可雙擊根目錄 `run.bat`；它呼叫 `scripts/run.ps1` 執行前置檢查，並以 `.runtime/setup-complete.json` 中的 manifest SHA-256 判斷 runtime/model 是否已完成驗證。manifest 改變或標記不存在時會重新執行 setup。`stop.bat` 僅停止由本專案 PID 檔記錄的程序。
 
+`run.ps1` 判定「已啟動」時必須同時確認 Web application 與 model readiness。若 Aura-GPT Web 程序仍在但 llama-server 已離線，啟動流程會復用既有 Web listener、重新啟動模型並重建 PID 紀錄；若 3000 埠屬於其他服務，則在載入模型前停止並回報衝突。
+
 ## 環境變數
 
 | 名稱 | 必要 | 用途 | 安全預設 |
@@ -61,6 +63,8 @@ Windows HIP 套件的 `ggml-hip.dll` 依賴對應的 ROCm runtime。啟動腳本
 3. 啟動 llama-server，等待 health/readiness 成功。
 4. 執行最小文字 smoke test；宣稱支援 tools 的模型再執行工具 smoke test。
 5. 啟動 Next.js，輸出本機 URL 與 correlation-friendly log。
+
+若第 5 步的 Aura-GPT Web 程序已存在，則復用該程序並只恢復缺失的 llama-server；不得僅因 `/api/status` 回傳 HTTP 200 就忽略其中的 model readiness。
 
 模型切換採「停止 → 修改 profile/path → 啟動 → smoke test」。第一版不稱為 hot swap。
 

@@ -13,7 +13,7 @@
 
 ## ADR-002：LangChain.js 是核心 Agent 編排層
 
-- 狀態：Accepted
+- 狀態：Superseded by ADR-009
 - 背景：原設計同時指定 AI SDK 與 LangChain，但兩者責任重疊，會增加串流與 tool event 轉換成本。
 - 決策：LangChain.js 負責模型抽象、Prompt、Structured Tools、有限步數 Agent loop 與執行事件，是唯一 Agent orchestrator。AI SDK 僅負責前端聊天狀態及串流呈現，由 adapter 轉換 LangChain 事件。
 - 替代方案：由 AI SDK 或自製程式管理 Agent loop。
@@ -62,6 +62,14 @@
 - 決策：完整採用概念稿的工作台資訊架構與視覺語言。已實作能力接入正式流程；尚未實作能力保留入口並明確標示「待補」或 disabled，不建立假資料。
 - 後果：視覺結構可以先穩定，但任何 planned 入口轉為可操作前，仍須補齊產品契約、實作、測試與必要的隱私／安全決策；模型入口不得暗示 hot swap。
 
+## ADR-009：靜態 UI、Python Agent 與 Go 桌面 Supervisor
+
+- 狀態：Accepted
+- 背景：Next.js 全端 dev server、PowerShell 程序管理與 llama-server 同時啟動造成 Turbopack/Node worker 與大型模型快取的記憶體尖峰，且 PID/子程序清理不可靠。產品需要可見的 Windows system tray 與不依賴 npm 的日常執行模式。
+- 決策：Next.js 僅產生靜態 UI；LangChain Python `create_agent()` 在 FastAPI 中成為唯一 Agent orchestrator；Go `JUNYX.exe` 提供 system tray、靜態服務、API reverse proxy、health check 與 Windows Job Object 程序管理。日常執行不啟動 Node.js、npm 或 PowerShell。
+- 替代方案：保留 LangChain.js 並建立獨立 Node API；用 Python 或 PowerShell 管理所有程序；Go 同時實作 Agent loop。
+- 後果：前後端契約跨 Pydantic/Zod，需契約測試；發布包需攜帶受控 Python runtime；原 ADR-002 被取代；Go 不重作 Agent loop，FastAPI route 不重作工具迴圈。
+
 ## 待決策清單
 
 | ID | 問題 | 阻擋階段 |
@@ -69,5 +77,5 @@
 | Q-001 | 天氣與臺股最新官方收盤價 | 已決定 |
 | Q-002 | 僅目前分頁，以記憶體保存 30 分鐘 | 已決定 |
 | Q-003 | 每工具、每分頁首次授權 | 已決定 |
-| Q-004 | MVP 不使用 Docker，PowerShell-only | 已決定 |
+| Q-004 | MVP 不使用 Docker；日常執行採 Go system tray，Python/FastAPI Agent | 已決定 |
 | Q-005 | Qwen3-8B Q4_K_M；AMD RX 9070 XT 16GB；HIP 優先、Vulkan 備援 | 已決定 |

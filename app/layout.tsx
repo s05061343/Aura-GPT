@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "JUNYX",
-  description: "以 LangChain 與本機模型驅動的 AI Agent",
+  description: "以本機模型驅動的 AI Agent",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

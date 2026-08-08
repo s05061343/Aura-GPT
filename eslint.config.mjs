@@ -5,5 +5,14 @@ import nextTs from "eslint-config-next/typescript";
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([".next/**", ".runtime/**", "models/**", "playwright-report/**", "test-results/**"]),
+  globalIgnores([
+    ".next/**",
+    ".runtime/**",
+    "backend/.pytest_cache/**",
+    "backend/**/__pycache__/**",
+    "desktop/web/**",
+    "models/**",
+    "playwright-report/**",
+    "test-results/**",
+  ]),
 ]);

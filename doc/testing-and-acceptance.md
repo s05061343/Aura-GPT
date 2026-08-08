@@ -6,7 +6,7 @@
 
 ### Unit
 
-- Zod schema 的有效、無效與邊界資料。
+- Pydantic API/tool schema 與 Zod UI/event schema 的有效、無效與邊界資料。
 - 工具 registry、風險政策、授權綁定及錯誤 mapping。
 - context 預算、步數限制、重試判斷與取消邏輯。
 - UI block 驗證與未知版本 fallback。
@@ -30,7 +30,8 @@
 - 桌面側欄收合與行動版 drawer 可操作；drawer 關閉時其中控制項不進入鍵盤焦點順序。
 - planned 功能入口呈現一致的「待補」或 disabled 狀態，不顯示虛構歷史、帳號或模型切換結果。
 - starter prompt 只填入 composer，不繞過正常送出、工具授權與 Agent runtime 流程。
-- Web 程序存在但 llama-server 離線時，再次執行 `run.bat` 能恢復模型、重建 PID，並讓 `/api/status` 回報 model ready；非 JUNYX 程序占用 3000 時必須 fail closed。
+- `JUNYX.exe` 重複執行不載入第二個模型；tray 結束與 `JUNYX.exe stop` 都會回收 FastAPI、llama-server 及其後代程序；非 JUNYX 程序占用 3000 時必須 fail closed。
+- 發布版程序樹不包含 npm、Node.js、Next.js dev server 或 Turbopack；靜態 UI 由 Go executable 提供。
 
 ### Security
 
@@ -57,7 +58,7 @@
 - 未授權外部工具不產生外部網路流量。
 - 未知 UI block 或工具結果異常時仍能顯示安全 fallback。
 - 支援模型清單中的每個 profile 有可追溯 smoke test 結果。
-- lint、type check、unit、integration 與關鍵 E2E 測試通過，並證明工具迴圈只由 LangChain runtime 管理。
+- TypeScript lint/typecheck、Python pytest、Go test/build 與關鍵 E2E 測試通過，並證明工具迴圈只由 LangChain Python runtime 管理。
 - 對應規格與 ADR 已更新，沒有阻擋發布的未決事項。
 
 ## 效能基準

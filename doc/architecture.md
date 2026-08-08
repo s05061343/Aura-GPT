@@ -4,103 +4,93 @@
 
 ## 架構原則
 
-- 將 UI、應用編排、工具執行與模型推論分離。
-- 對 llama.cpp 只依賴明確驗證過的 API 子集。
+- UI、Agent API、程序監控與模型推論使用明確程序邊界。
+- 日常執行不啟動 Node.js、npm、Next.js dev server 或 Turbopack。
+- 對 llama.cpp 只依賴明確驗證過的 OpenAI-compatible API 子集。
 - 模型輸出、工具輸出與外部 API 回應都視為不可信資料。
-- MVP 採最少必要抽象；只有需求出現後才加入工作流框架。
+- 所有本機服務只監聽 loopback；瀏覽器只接觸 Go gateway。
 
 ## 元件與責任
 
 ```text
 Browser
-  │  chat request / application stream events
+  │ http://127.0.0.1:3000
   ▼
-Next.js UI + AI SDK ─────── UI component registry
-  │
-  ▼
-Next.js Chat API ────────── stream protocol adapter
-  │
-  ▼
-LangChain Agent runtime ─── LangChain Tool registry ─── Local / external services
-  │
-  ▼
-LangChain model adapter
-  │  verified OpenAI-compatible subset
-  ▼
-llama-server ────────────── one configured GGUF model
+JUNYX.exe (Go system tray / supervisor / static server / reverse proxy)
+  ├── embedded Next.js static UI
+  ├── /api/* ───────────────► FastAPI (127.0.0.1:8000)
+  │                              ├── LangChain Python Agent
+  │                              ├── Pydantic tool registry
+  │                              └── session / HITL / NDJSON adapter
+  └── Windows Job Object
+       ├── Python backend
+       └── llama-server (127.0.0.1:8080)
 ```
 
-### Browser 與 UI
+### Next.js 靜態 UI
 
-- 管理輸入、訊息顯示、停止、重試及工具授權互動。
-- 僅渲染 Markdown 與白名單 UI component descriptor。
-- 不保存伺服器秘密，不直接呼叫 llama-server 或具權限的工具。
-- App Shell 採側欄、Topbar、對話工作區與 composer 分區；行動版側欄使用 modal drawer，關閉時不得留在鍵盤焦點順序。
-- 尚未實作的產品入口必須使用一致的 planned/disabled 狀態，不得以假歷史、假帳號或可操作控制項模擬完成能力。
+- Next.js 僅在開發與發布建置階段執行，使用 `output: "export"` 產生靜態資產。
+- 管理輸入、訊息呈現、停止、重試及工具授權互動。
+- 只呼叫同源 `/api/chat` 與 `/api/status`；不直接存取 FastAPI 或 llama-server。
+- 僅渲染 sanitized Markdown 與白名單 UI component descriptor。
+- UI 外觀、工作台資訊架構與 planned/disabled 狀態保持既有契約。
 
-### Next.js Chat API
+### Go 桌面 Supervisor
 
-- 驗證 HTTP 請求、建立 correlation ID、套用限制並啟動串流。
-- 呼叫 LangChain Agent runtime，不自行執行第二套 tool loop。
-- 將 LangChain 執行事件轉為應用串流事件，再交給前端 AI SDK 消費。
-- 將取消訊號傳遞至 LangChain runtime。
+- `JUNYX.exe` 是使用者唯一入口，常駐 Windows system tray，不顯示終端視窗。
+- 嵌入並提供靜態 UI，將 `/api/*` 反向代理至 FastAPI。
+- 驗證設定、模型與 backend；以 HIP 優先、Vulkan 備援啟動 llama-server。
+- 啟動、監控與停止 FastAPI、llama-server；所有子程序加入 kill-on-close Windows Job Object。
+- 重複啟動只開啟既有 UI；`JUNYX.exe stop` 透過帶本機隨機 token 的控制端點要求既有 instance 結束。
+- Tray 選單提供開啟、狀態、重新啟動、檢視記錄及結束。
 
-### LangChain Agent runtime
+### FastAPI Agent API
 
-- 是唯一的 Agent 編排層，維護有限步數的 model → tool → model 迴圈。
+- 驗證 HTTP 請求、建立 correlation ID、套用限制並輸出 NDJSON 事件。
+- LangChain Python `create_agent()` 是唯一 Agent loop；FastAPI route 不建立第二套工具迴圈。
+- 將取消訊號傳遞至 Agent、模型與工具，並維護 30 分鐘記憶體 session。
+- 只監聽 `127.0.0.1:8000`，不直接對瀏覽器或 LAN 開放。
+
+### LangChain Python Agent
+
 - 管理 Prompt、message mapping、工具選擇、工具結果回填與最終輸出。
-- 透過 callback/event stream 發出文字、工具、錯誤與完成事件。
-- 套用最大步數、timeout、取消、重試及平行執行政策。
-- 核心 runtime 不依賴 React、HTTP response 或特定 UI 元件。
+- 使用內建 middleware 實作模型步數、工具次數及 human-in-the-loop 限制。
+- 使用記憶體 checkpointer 暫停及恢復工具授權；不建立自訂 LangGraph。
+- LangChain 內部事件經 protocol adapter 轉為穩定的 `JunyxEvent`。
 
-### LangChain model adapter
+### 工具與模型
 
-- 以 LangChain Chat Model 介面封裝 llama-server，隔離 base URL、model alias、chat template 差異與能力旗標。
-- 將 LangChain messages、tools schema、串流 chunk 與 llama-server 的已驗證 API 子集互相轉換。
-- 在啟動或 smoke test 階段檢查文字串流及工具呼叫能力。
-- 不以「檔案是 GGUF」推論它一定支援 tools。
-
-### LangChain Tool registry
-
-- 每個工具以 LangChain Structured Tool 形式註冊，定義名稱、版本、說明與 Zod schema。
-- 權限、風險等級、執行器、timeout、輸出限制與 UI mapping 由應用層 metadata/wrapper 補充，不能只依賴模型可見說明。
-- 統一處理 timeout、錯誤正規化、輸出大小與敏感資料遮蔽。
-- 執行器不得信任模型提供的路徑、URL 或識別碼。
-
-### llama-server
-
-- MVP 每個服務程序只載入一個模型。
-- 僅綁定 loopback，除非使用者明確設定其他安全網路拓撲。
-- 模型更換透過停止、修改設定、重新啟動與 smoke test 完成。
+- 工具使用 Pydantic schema、allowlist、timeout、輸出限制與安全錯誤 mapping。
+- 外部工具每個分頁首次使用前必須取得授權。
+- llama-server 每個程序只載入一個 GGUF 模型，只綁定 loopback。
+- 模型更換仍採停止、修改設定、重新啟動與 smoke test，不支援 hot swap。
 
 ## 主要資料流
 
 ### 一般對話
 
-1. UI 送出正規化訊息與 conversation ID。
-2. Chat API 驗證大小與角色，呼叫 LangChain Agent runtime；runtime 再透過 LangChain model adapter 存取模型。
-3. 文字增量經統一串流事件送回 UI。
-4. 完成事件包含停止原因及基本使用量；無法取得的欄位保持省略。
+1. UI 將正規化命令送到 Go gateway 的 `/api/chat`。
+2. Go 透明串流代理至 FastAPI；FastAPI 驗證後交給 LangChain Agent。
+3. Agent 透過 `ChatOpenAI` adapter 存取本機 llama-server。
+4. NDJSON 增量事件原路回到 UI，由 AI SDK transport 轉為畫面訊息。
 
 ### 工具呼叫
 
 1. 模型回傳結構化 tool call。
-2. LangChain Agent runtime 解析 tool call；應用層 wrapper 檢查工具是否存在、schema 是否有效及是否需要授權。
-3. 工具在 timeout 與輸出限制內執行。
-4. 正規化結果回送模型；可顯示資料另建立 UI descriptor。
-5. 達到最大步數、取消或錯誤時停止迴圈。
+2. LangChain Agent 解析並由 HITL middleware 在未授權時暫停。
+3. UI 顯示實際工具名稱與參數；批准後 FastAPI 以 `Command(resume=...)` 恢復同一 thread。
+4. 工具通過 Pydantic 與業務規則驗證後執行，結果回填模型並建立白名單 UI descriptor。
 
 ## 技術選擇
 
-- UI/API：Next.js App Router，實際版本在建立專案時鎖定。
-- Agent 編排：LangChain.js，作為模型、Prompt、工具與有限步數執行迴圈的核心抽象。
-- UI 串流：Vercel AI SDK 僅處理前端聊天狀態與呈現；由 protocol adapter 消費應用串流事件。
-- Schema：Zod，工具執行期驗證與 TypeScript 型別共用來源。
-- 推論：llama.cpp 的 `llama-server`。
-- LangGraph：不建立自訂 graph；僅使用 LangChain `createAgent()` 內建 runtime 與 HITL 所需的記憶體 checkpointer。永久 checkpoint、多 Agent 或自訂分支圖需另立 ADR。
+- 桌面與程序管理：Go 1.26、Windows Job Object、Fyne systray。
+- UI：Next.js 16／React 19 靜態輸出；Vercel AI SDK 只管理瀏覽器聊天狀態與串流呈現。
+- API：Python 3.13、FastAPI、Uvicorn、Pydantic。
+- Agent：LangChain Python `create_agent()` 與內建 LangGraph runtime。
+- 推論：llama.cpp `llama-server`，AMD HIP 預設、Vulkan 備援。
 
 ## 演進邊界
 
-- 若加入對話持久化，應新增 repository 介面，不讓 UI 直接依賴資料庫。
-- 若加入多模型，新增 model registry/router，不改變 Chat API 的基本事件契約。
-- 若加入遠端存取，必須先設計認證、CSRF、TLS、rate limit 及秘密管理。
+- 發布包必須包含 `JUNYX.exe`、受控 Python runtime/dependencies、模型 runtime 與必要資產；Node.js 不是日常執行依賴。
+- 若加入遠端存取，必須先設計認證、CSRF、TLS、rate limit 與秘密管理。
+- 若加入持久化或多模型，新增明確 repository/router 邊界，不改變 UI 基本事件契約。

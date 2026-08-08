@@ -4,11 +4,11 @@
 
 ## 工具定義
 
-每個工具以 LangChain Structured Tool 註冊，並必須包含：
+每個工具以 LangChain Python Structured Tool 註冊，並必須包含：
 
 - 穩定且具 namespace 的名稱，例如 `weather.current.v1`。
 - 清楚、避免誘導誤用的模型可見說明。
-- 可供 LangChain 綁定模型的 Zod input schema，以及獨立的 output schema 或正規化器。
+- 可供 LangChain 綁定模型的 Pydantic input schema，以及獨立的 output schema 或正規化器。
 - 風險等級、是否唯讀、是否冪等、timeout 與最大輸出大小。
 - 執行器與公開錯誤 mapping。
 - 可選的 UI block mapping。
@@ -27,7 +27,7 @@
 ## 工具執行流程
 
 1. 只接受 registry 中存在的精確工具名稱。
-2. 解析後以 Zod 驗證；未知欄位預設拒絕。
+2. 解析後以 Pydantic strict model 驗證；未知欄位預設拒絕。
 3. 套用路徑、URL、網域、數值範圍等業務限制。
 4. 根據風險政策取得授權。
 5. 以 AbortSignal、timeout 與輸出上限執行。

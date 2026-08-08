@@ -9,7 +9,7 @@
 - 本機推論是預設路徑。LangSmith 在有金鑰時預設上傳完整 Agent trace，UI 必須明確揭露；其他外部工具仍需在每分頁首次使用前確認。
 - 模型輸出永遠視為不可信輸入。工具參數必須驗證，Generative UI 只能使用白名單元件，不得執行模型生成的 HTML、JavaScript 或指令。
 - 不把 `.env`、模型檔、對話資料、金鑰或執行紀錄提交至版本控制。
-- 優先維持 Windows PowerShell 可用；若提供 Bash 操作，需同步提供等價 PowerShell 或跨平台方式。
+- 日常執行入口是 Windows Go system tray executable；PowerShell 只可用於開發／建置輔助，不承載核心生命週期邏輯。若提供 Bash 操作，需同步提供等價 PowerShell 或跨平台方式。
 - 目標 GPU 是 AMD Radeon RX 9070 XT；Windows runtime 預設 HIP、Vulkan 備援，不得引入 NVIDIA CUDA 作為預設依賴。
 
 ## 文件讀取路由
@@ -36,7 +36,8 @@
 
 - 第一版是單機、單使用者、單一載入模型。
 - 「模型切換」初期代表重新啟動推論服務，不宣稱支援 hot swap。
-- LangChain.js 是核心且唯一的 Agent 編排層，負責模型抽象、Prompt、工具註冊、Agent loop 與執行事件。
+- LangChain Python 是核心且唯一的 Agent 編排層，負責模型抽象、Prompt、工具註冊、Agent loop 與執行事件。
 - Vercel AI SDK 僅負責前端聊天狀態與串流呈現，不得再建立第二套工具迴圈。
-- 不建立自訂 LangGraph；允許 LangChain `createAgent()` 內建的 LangGraph runtime、middleware、interrupt 與記憶體 checkpointer。
+- Next.js 僅輸出靜態 UI；Go 負責 system tray、靜態服務、reverse proxy 與程序生命週期；FastAPI 提供本機 Agent API。
+- 不建立自訂 LangGraph；允許 LangChain Python `create_agent()` 內建的 LangGraph runtime、middleware、interrupt 與記憶體 checkpointer。
 - 套件版本必須鎖定並以官方文件驗證相容性；設計文件不使用未驗證的模型檔名或浮動版本作為承諾。

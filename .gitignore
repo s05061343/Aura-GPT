@@ -2,6 +2,9 @@
 node_modules/
 .next/
 out/
+/JUNYX.exe
+desktop/web/*
+!desktop/web/placeholder.txt
 
 # local runtime and model artifacts
 .runtime/
@@ -16,6 +19,10 @@ logs/
 
 # tests and editors
 coverage/
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
 playwright-report/
 test-results/
 *.tsbuildinfo

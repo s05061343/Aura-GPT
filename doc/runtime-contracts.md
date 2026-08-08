@@ -2,7 +2,7 @@
 
 狀態：Draft
 
-本文件定義概念契約；實作時應以共用 Zod schema 產生 TypeScript 型別，避免前後端各自維護。
+本文件定義跨語言契約。FastAPI 使用 Pydantic 驗證服務端輸入，靜態 UI 使用 Zod 驗證串流事件與 UI block；契約測試必須確保兩端一致。
 
 ## Chat request
 
@@ -22,7 +22,7 @@ type ChatCommand =
 
 ## 串流事件
 
-LangChain callback/event stream 先轉為 NDJSON `JunyxEvent`，再由自訂 AI SDK `ChatTransport` 轉為 `UIMessageChunk`；UI 不依賴 LangChain 內部事件形狀：
+LangChain Python event stream 先由 FastAPI adapter 轉為 NDJSON `JunyxEvent`，經 Go reverse proxy 原樣串流，再由自訂 AI SDK `ChatTransport` 轉為 `UIMessageChunk`；UI 不依賴 LangChain 內部事件形狀：
 
 `messages` stream 只允許 AI message chunk 轉成 `text-delta`；HumanMessage、ToolMessage 與其他內部訊息不得成為使用者可見文字。工具原始 JSON 只供 Agent 回填與伺服器端 UI mapping 使用。
 
@@ -40,7 +40,7 @@ type JunyxStreamEvent =
 
 ## Agent loop
 
-Agent loop 由 LangChain runtime 唯一負責。Next.js route 只做傳輸、驗證與事件轉換，不自行判斷下一個工具步驟。MVP 預設政策：
+Agent loop 由 LangChain Python runtime 唯一負責。FastAPI route 只做傳輸、驗證與事件轉換，Go 只做反向代理，兩者都不自行判斷下一個工具步驟。MVP 預設政策：
 
 - 每次使用者請求最多 5 個模型步驟；正式數值可由環境設定覆寫並設硬上限。
 - 每個工具都有獨立 timeout，預設建議 15 秒。
@@ -52,7 +52,7 @@ Agent loop 由 LangChain runtime 唯一負責。Next.js route 只做傳輸、驗
 
 ## LangChain 邊界
 
-- 對內定義 `JunyxAgentRuntime` 介面，避免 route 直接耦合特定 Agent factory 或 executor 類別。
+- Agent runtime 與 FastAPI route 保持模組邊界，避免 HTTP transport 直接耦合工具執行細節。
 - LangChain message、tool call 與 callback event 僅存在於 agent/model adapter 層。
 - model adapter 必須支援逐步串流、工具 schema 綁定、AbortSignal 與結構化完成原因。
 - LangChain 版本升級若改變 event schema，應只修改 protocol adapter 與契約測試。

@@ -1,0 +1,7 @@
+fastapi
+httpx
+langchain
+langchain-openai
+pydantic-settings
+pytest
+uvicorn

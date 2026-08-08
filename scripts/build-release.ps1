@@ -8,6 +8,8 @@ $pipZipapp = Join-Path $root '.runtime\downloads\pip.pyz'
 $webSource = Assert-WithinJunyxRoot (Join-Path $root 'out')
 $webTarget = Assert-WithinJunyxRoot (Join-Path $root 'desktop\web')
 $exeTarget = Assert-WithinJunyxRoot (Join-Path $root 'JUNYX.exe')
+$iconSource = Assert-WithinJunyxRoot (Join-Path $root 'desktop\assets\junyx.ico')
+$windowsResource = Assert-WithinJunyxRoot (Join-Path $root 'desktop\junyx.syso')
 
 if (-not (Test-Path -LiteralPath $python -PathType Leaf)) { throw "Python toolchain not found: $python" }
 if (-not (Test-Path -LiteralPath $go -PathType Leaf)) { throw "Go toolchain not found: $go" }
@@ -36,6 +38,8 @@ Copy-Item -Path (Join-Path $webSource '*') -Destination $webTarget -Recurse -For
 
 Push-Location (Join-Path $root 'desktop')
 try {
+    & $go run 'github.com/akavel/rsrc@v0.10.2' -arch amd64 -ico $iconSource -o $windowsResource
+    if ($LASTEXITCODE -ne 0) { throw 'Windows icon resource generation failed.' }
     & $go test ./...
     if ($LASTEXITCODE -ne 0) { throw 'Go tests failed.' }
     & $go build -trimpath -ldflags '-s -w -H=windowsgui' -o $exeTarget .

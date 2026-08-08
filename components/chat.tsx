@@ -140,7 +140,7 @@ export function Chat() {
       <aside className={`junyx-sidebar ${mobileSidebarOpen ? "is-open" : ""}`} aria-label="主要導覽" inert={isMobile && !mobileSidebarOpen ? true : undefined}>
         <div className="sidebar-brand-row">
           <div className="brand-lockup">
-            <span className="brand-mark"><Sparkles aria-hidden="true" /></span>
+            <span className="brand-mark" aria-hidden="true" />
             <span className="brand-copy"><strong>JUNYX</strong><small>Local AI Agent</small></span>
           </div>
           <button className="icon-control desktop-collapse" onClick={() => setSidebarCollapsed((value) => !value)} aria-label={sidebarCollapsed ? "展開側邊欄" : "收合側邊欄"}>
